@@ -110,7 +110,7 @@ export const Footer: React.FC = () => {
               aria-label="Hubungi nomor WhatsApp resmi Alfaratha"
             >
               <WhatsAppIcon className="w-5 h-5 text-[#B9EEDA]" />
-              <span>+62 812-3456-7890</span>
+              <span>+62 815-5443-1137</span>
             </a>
             <span className="text-label-code text-[#DAE5DE]">
               admin@alfaratha.store

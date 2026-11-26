@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDown, Snowflake, ShieldCheck, PenLine, Star, MapPin, ArrowRight } from 'lucide-react';
+import { ArrowDown, Snowflake, ShieldCheck, Truck, Star, MapPin, ArrowRight } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
 
@@ -80,8 +80,8 @@ export const HeroSection: React.FC = () => {
                 <span>Garansi Kemasan Aman</span>
               </div>
               <div className="flex items-center gap-1.5 col-span-2 sm:col-span-1">
-                <PenLine className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
-                <span>Gratis Kartu Nama Jamaah</span>
+                <Truck className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
+                <span>Pengiriman Pulau Jawa</span>
               </div>
             </div>
           </div>
