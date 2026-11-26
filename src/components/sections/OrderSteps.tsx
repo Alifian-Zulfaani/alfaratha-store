@@ -19,8 +19,8 @@ export const OrderSteps: React.FC = () => {
     {
       step: '03',
       num: '3',
-      title: 'Pengiriman Cold-Storage ke Rumah',
-      desc: 'Paket dipacking aman berlapis bubble wrap dan kardus tebal, siap sampai di kediaman sebelum waktu kepulangan jamaah.',
+      title: 'Pengiriman Aman ke Rumah Anda',
+      desc: 'Paket dipacking rapi berlapis bubble wrap dan kardus tebal, siap sampai di kediaman sebelum jadwal kepulangan jamaah.',
       isHighlight: true,
     },
   ];

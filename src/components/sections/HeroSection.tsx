@@ -42,7 +42,7 @@ export const HeroSection: React.FC = () => {
             </h1>
 
             <p className="text-xs sm:text-sm lg:text-base text-[#52605A] max-w-xl mb-6 leading-relaxed">
-              Dari Kurma Ajwa Aliyah Madinah, Kismis Golden Jumbo, hingga dus paket souvenir siap bagi. Preservasi suhu dingin 4°C menjamin kelembapan kurma tetap legit tanpa kutu hingga tiba di rumah Anda.
+              Dari Kurma Ajwa Aliyah Madinah, Kismis Golden Jumbo, hingga dus paket souvenir siap bagi. Penyimpanan sejuk dan higienis menjaga buah tetap lembut, manis alami, dan bebas kutu hingga tiba di rumah Anda.
             </p>
 
             {/* Dual CTAs */}
@@ -73,7 +73,7 @@ export const HeroSection: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-2 gap-x-4 pt-4 border-t border-[#E2E8E5] w-full text-[#52605A] text-label-code text-[11px] sm:text-xs">
               <div className="flex items-center gap-1.5">
                 <Snowflake className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
-                <span>Cold-Storage 4°C</span>
+                <span>Penyimpanan Sejuk</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
@@ -93,10 +93,10 @@ export const HeroSection: React.FC = () => {
               <div className="flex items-center justify-between border-b border-[#E2E8E5] pb-2.5 mb-3">
                 <span className="text-label-caps text-[#3A6B5C] flex items-center gap-1 font-semibold text-[10.5px]">
                   <Star className="w-3.5 h-3.5 fill-[#3A6B5C]" />
-                  PILIHAN JAMAAH 2025
+                  PILIHAN JAMAAH
                 </span>
                 <span className="text-label-code bg-white px-2 py-0.5 border border-[#E2E8E5] text-[#52605A] text-[10px]">
-                  TEMPERATUR 4°C
+                  STOK SEGAR
                 </span>
               </div>
 

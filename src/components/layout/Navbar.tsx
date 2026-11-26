@@ -10,7 +10,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { id: 'katalog', label: 'Katalog Kurma', href: '#katalog-produk' },
     { id: 'paket', label: 'Paket Oleh-Oleh', href: '#paket-haji' },
-    { id: 'mutu', label: 'Keunggulan Cold-Storage', href: '#standar-mutu' },
+    { id: 'mutu', label: 'Keunggulan Produk', href: '#standar-mutu' },
     { id: 'testimoni-faq', label: 'Testimoni & FAQ', href: '#faq-testimoni' },
   ];
 
@@ -115,7 +115,7 @@ export const Navbar: React.FC = () => {
               <span>Chat CS Alfaratha via WhatsApp</span>
             </a>
             <div className="flex items-center justify-between text-label-code text-[#52605A] px-2 pt-1">
-              <span>Suhu Cold Storage: 4°C</span>
+              <span>Stok Segar &amp; Higienis</span>
               <span className="text-[#3A6B5C] font-semibold">100% Impor Resmi</span>
             </div>
           </div>

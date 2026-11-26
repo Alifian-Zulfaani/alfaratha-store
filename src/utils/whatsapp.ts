@@ -40,7 +40,7 @@ export function generateWhatsAppUrl(params?: WhatsAppOrderParams): string {
     const priceStr = params.price ? ` [${formatIDR(params.price)}]` : '';
     text = `Halo Alfaratha Store, saya ingin memesan:\n\n` +
       `🛒 *${params.productName}*${variantStr}${priceStr}\n` +
-      `\nApakah stok ini ready dan bisa langsung dikirim dari cold storage? Terima kasih!`;
+      `\nApakah stok ini ready dan bisa langsung dikirim? Terima kasih!`;
   } else {
     text = `Halo Alfaratha Store, saya ingin konsultasi mengenai kurma premium & paket oleh-oleh haji/umroh. Mohon info pricelist dan rekomendasinya. Terima kasih!`;
   }

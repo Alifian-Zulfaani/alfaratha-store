@@ -29,7 +29,7 @@ export const FinalCTA: React.FC = () => {
               </h2>
 
               <p className="text-xs sm:text-sm text-[#DAE5DE] mb-6 sm:mb-8 leading-relaxed max-w-xl">
-                Tidak perlu tergesa-gesa berbelanja di pasar Tanah Suci di sela ibadah Anda. Kunjungi toko dan cold storage kami langsung atau pesan antar dengan jaminan kurma segar sampai ke rumah.
+                Tidak perlu tergesa-gesa berbelanja di pasar Tanah Suci di sela ibadah Anda. Kunjungi toko kami langsung atau pesan antar dengan jaminan kurma segar sampai ke rumah.
               </p>
 
               {/* Action Buttons */}
@@ -82,7 +82,7 @@ export const FinalCTA: React.FC = () => {
                   Alfaratha Kurma
                 </span>
                 <span className="border border-[#26332E] bg-[#18221E] px-2 py-0.5 text-label-caps text-[#DAE5DE]">
-                  Cold Storage &amp; Toko
+                  Toko Alfaratha
                 </span>
               </div>
 

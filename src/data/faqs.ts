@@ -22,8 +22,8 @@ export const FAQS_DATA: FAQItem[] = [
   {
     id: 'faq-4',
     question: 'Bagaimana sistem pengiriman agar kurma tidak rusak atau meleleh di perjalanan?',
-    badge: 'Cold-Storage & Safety Packing',
-    answer: 'Semua kurma kami tersimpan di cold storage bersuhu 4°C - 8°C sebelum pengiriman. Untuk pengiriman luar kota, kami menggunakan packing kardus tebal khusus, bubble wrap berlapis, serta opsi ice-gel untuk kurma basah (Sukkari Rutob). Kami juga memberikan garansi ganti baru jika barang tiba dalam kondisi rusak.',
+    badge: 'Pengemasan Aman',
+    answer: 'Semua kurma kami disimpan di ruang sejuk sebelum pengiriman. Untuk pengiriman luar kota, kami menggunakan packing kardus tebal khusus, bubble wrap berlapis, serta opsi ice-gel untuk kurma basah (Sukkari Rutob). Kami juga memberikan garansi ganti baru jika barang tiba dalam kondisi rusak.',
   },
   {
     id: 'faq-5',

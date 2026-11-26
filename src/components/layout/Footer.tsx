@@ -1,5 +1,6 @@
 import React from 'react';
-import { ShieldCheck, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, MapPin, Lock } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
 
@@ -27,7 +28,7 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-[#DAE5DE] leading-relaxed">
-              Kurasi kurma grade super dan souvenir ibadah autentik Tanah Suci dengan protokol preservasi suhu terkendali.
+              Kurma pilihan kualitas super dan oleh-oleh khas Tanah Suci yang dikemas rapi dan higienis.
             </p>
             <div className="inline-flex items-center gap-2 border border-[#3A6B5C] text-[#B9EEDA] px-2.5 py-1 text-label-caps w-fit font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -59,7 +60,7 @@ export const Footer: React.FC = () => {
               href="#standar-mutu"
               onClick={scrollTo('#standar-mutu')}
             >
-              Keunggulan Cold-Storage
+              Keunggulan Produk
             </a>
             <a
               className="text-xs text-[#DAE5DE] hover:text-white transition-colors py-1"
@@ -70,17 +71,17 @@ export const Footer: React.FC = () => {
             </a>
           </div>
 
-          {/* Col 3: Preservasi & Jam Gudang */}
+          {/* Col 3: Jam Operasional & Lokasi */}
           <div className="flex flex-col gap-2.5">
             <p className="text-label-caps uppercase tracking-widest text-white font-semibold">
-              Preservasi &amp; Jam Gudang
+              Jam Operasional Toko
             </p>
             <div className="text-xs text-[#DAE5DE] space-y-1">
-              <p className="text-white font-medium">Cold Storage Distribution:</p>
+              <p className="text-white font-medium">Buka Setiap Hari:</p>
               <p>Senin – Minggu: 07:30 – 22:00 WIB</p>
             </div>
             <p className="text-xs text-[#DAE5DE] mt-1 leading-relaxed">
-              Suhu stabil 2°C – 4°C untuk menjaga kelembapan daging kurma primer.
+              Penyimpanan sejuk dan higienis agar kurma tetap empuk, segar, dan tidak berkutu.
             </p>
             <a
               href="https://maps.app.goo.gl/mFNWPrfMV3TEtqqV8"
@@ -143,6 +144,14 @@ export const Footer: React.FC = () => {
             >
               Pengiriman Dingin
             </a>
+            <Link
+              to="/login"
+              aria-label="Masuk ke portal kasir dan inventori staff Alfaratha"
+              className="inline-flex items-center gap-1.5 text-[#9ED1BF] hover:text-white transition-colors py-1 border-l border-white/15 pl-4"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Login Staff</span>
+            </Link>
           </div>
         </div>
       </div>

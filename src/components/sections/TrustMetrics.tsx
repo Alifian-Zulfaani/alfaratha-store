@@ -17,8 +17,8 @@ export const TrustMetrics: React.FC = () => {
     },
     {
       icon: Snowflake,
-      badge: 'PRESERVASI KHUSUS',
-      title: 'Cold Storage 4°C',
+      badge: 'PENYIMPANAN SEJUK',
+      title: 'Kualitas Terjaga',
       desc: 'Daging buah tetap empuk lembab, tidak asam atau berulat.',
     },
     {

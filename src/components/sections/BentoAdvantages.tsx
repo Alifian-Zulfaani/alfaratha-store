@@ -18,13 +18,13 @@ export const BentoAdvantages: React.FC = () => {
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-[#52605A] max-w-md leading-relaxed">
-            Protokol preservasi ketat dari panen hingga pengemasan di rumah Anda.
+            Penanganan rapi dan higienis dari penyimpanan hingga sampai di rumah Anda.
           </p>
         </div>
 
         {/* Asymmetrical Bento Grid on Desktop, 2x2 Compact Grid on Mobile */}
         <div className="grid grid-cols-2 md:grid-cols-12 gap-3 sm:gap-5 items-stretch">
-          {/* Bento 1: Cold Storage */}
+          {/* Bento 1: Penyimpanan Sejuk */}
           <div className="col-span-2 sm:col-span-1 md:col-span-7 h-full bg-white border border-[#E2E8E5] p-4 sm:p-5 lg:p-6 flex flex-col justify-between transition-colors hover:border-[#18221E]">
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -32,14 +32,14 @@ export const BentoAdvantages: React.FC = () => {
                   <Snowflake className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span className="text-label-code border border-[#3A6B5C]/40 text-[#3A6B5C] bg-[#F1F5F3] px-2 py-0.5 text-[10px] sm:text-xs">
-                  SUHU 4°C – 8°C
+                  PENYIMPANAN SEJUK
                 </span>
               </div>
               <h3 className="font-headline text-base sm:text-lg text-[#18221E] font-bold mb-1.5">
-                Kualitas Terjaga di Cold Storage
+                Kualitas Kurma Tetap Segar &amp; Empuk
               </h3>
               <p className="text-xs sm:text-sm text-[#52605A] leading-relaxed mb-4">
-                Disimpan pada pendingin berkelembapan terkontrol untuk mencegah pengkristalan gula, menjaga daging tetap empuk lembut, dan bebas hama gudang.
+                Disimpan di ruangan sejuk berkelembapan terjaga agar gula alami tidak mengkristal, daging buah tetap empuk, dan bebas hama gudang.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#E2E8E5] text-label-code text-[#18221E]">

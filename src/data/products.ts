@@ -17,7 +17,7 @@ export const PRODUCTS_DATA: Product[] = [
     features: [
       '100% Asli Madinah Bersertifikat',
       'Tekstur Daging Lembut & Bebas Kutu',
-      'Disimpan di Suhu 4°C Cold Storage',
+      'Disimpan di Ruangan Sejuk & Higienis',
     ],
     variants: [
       { id: 'ajwa-500g', label: 'Kemasan 500 gr', price: 85000, inStock: true },
@@ -39,7 +39,7 @@ export const PRODUCTS_DATA: Product[] = [
     defaultVariantIndex: 0,
     features: [
       'Rasa Manis Lembut Seperti Madu Karamel',
-      'Fresh Cold Chain Logistics',
+      'Kualitas Segar & Terjaga',
       'Sangat Disukai Orang Tua & Anak',
     ],
     variants: [
@@ -374,7 +374,7 @@ export const PRODUCTS_DATA: Product[] = [
     id: 'gift-3-sekat',
     name: 'Gift Mika 3 Sekat Eksklusif',
     category: 'cokelat-gift',
-    origin: 'Alfaratha Curated',
+    origin: 'Alfaratha Store',
     description: 'Paket mika 3 sekat praktis dan higienis berisi kombinasi Kurma pilihan, Kismis Manis, dan Kacang Pistachio renyah.',
     badge: 'premium',
     badgeText: 'Praktis Mewah',
@@ -395,7 +395,7 @@ export const PRODUCTS_DATA: Product[] = [
     id: 'gift-hampers-suvenir',
     name: 'Gift Hampers Dus Suvenir Tanpa Zam-Zam',
     category: 'cokelat-gift',
-    origin: 'Alfaratha Curated',
+    origin: 'Alfaratha Store',
     description: 'Dus suvenir motif Menara Makkah isi Cokelat Truffle, Kismis, Kurma, Kacang Arab & botol kosong siap bagi.',
     badge: 'best-seller',
     badgeText: 'Paket Hemat',

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { MapPin, Star, Layers, Download, ChevronRight } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
-import { PRODUCTS_DATA } from '../../data/products';
-import { ProductCategory, Product } from '../../types';
+import { useStore } from '../../context/StoreContext';
+import { ProductCategory, NormalizedProduct } from '../../types';
 import { generateWhatsAppUrl, formatIDR } from '../../utils/whatsapp';
 
 export const ProductCatalog: React.FC = () => {
+  const { products } = useStore();
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('all');
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
 
@@ -17,7 +18,9 @@ export const ProductCatalog: React.FC = () => {
     { key: 'zamzam-herbal', label: 'Air Zamzam & Herbal' },
   ];
 
-  const filteredProducts = PRODUCTS_DATA.filter((item) => {
+  const retailProducts = products.filter((item) => item.category !== 'paket');
+
+  const filteredProducts = retailProducts.filter((item) => {
     if (activeCategory === 'all') return true;
     return item.category === activeCategory;
   });
@@ -29,7 +32,7 @@ export const ProductCatalog: React.FC = () => {
     }));
   };
 
-  const getActiveVariant = (product: Product) => {
+  const getActiveVariant = (product: NormalizedProduct) => {
     const idx = selectedVariants[product.id] ?? product.defaultVariantIndex ?? 0;
     return product.variants[idx] || product.variants[0];
   };
@@ -42,7 +45,7 @@ export const ProductCatalog: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 text-[#3A6B5C] text-label-caps uppercase tracking-widest mb-1 font-semibold">
               <span className="w-1.5 h-1.5 bg-[#3A6B5C]" />
-              <span>Kurasi Panen Segar &amp; Oleh-Oleh</span>
+              <span>Pilihan Panen Segar &amp; Oleh-Oleh</span>
             </div>
             <h2 className="font-headline text-xl sm:text-2xl lg:text-3xl text-[#18221E] font-semibold tracking-tight">
               Katalog Produk Pilihan Alfaratha
@@ -88,6 +91,9 @@ export const ProductCatalog: React.FC = () => {
         <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-5 -mx-4 px-4 sm:mx-0 sm:px-0 items-stretch">
           {filteredProducts.map((product) => {
             const activeVariant = getActiveVariant(product);
+            const isOutOfStock = activeVariant.stock <= 0 || !activeVariant.inStock;
+            const isLowStock =
+              !isOutOfStock && activeVariant.stock <= activeVariant.minStock;
             const waUrl = generateWhatsAppUrl({
               productName: product.name,
               variantLabel: activeVariant.label,
@@ -97,7 +103,9 @@ export const ProductCatalog: React.FC = () => {
             return (
               <div
                 key={product.id}
-                className="product-item flex flex-col h-full bg-white border border-[#E2E8E5] transition-colors duration-200 hover:border-[#18221E] group w-[76vw] max-w-[280px] md:w-auto shrink-0 snap-center justify-between"
+                className={`product-item flex flex-col h-full bg-white border border-[#E2E8E5] transition-colors duration-200 hover:border-[#18221E] group w-[76vw] max-w-[280px] md:w-auto shrink-0 snap-center justify-between ${
+                  isOutOfStock ? 'opacity-85' : ''
+                }`}
               >
                 {/* Top Status Strip */}
                 <div className="p-2 sm:p-2.5 border-b border-[#E2E8E5] flex items-center justify-between text-[#52605A] text-label-code bg-white shrink-0">
@@ -105,9 +113,19 @@ export const ProductCatalog: React.FC = () => {
                     <Star className="w-3 h-3 fill-[#3A6B5C]" />
                     {product.badgeText ? product.badgeText.toUpperCase() : 'MUTU TERJAMIN'}
                   </span>
-                  <span className="border border-[#E2E8E5] px-1.5 py-0.5 bg-[#F1F5F3] text-[9.5px]">
-                    Cold Stored 4°C
-                  </span>
+                  {isOutOfStock ? (
+                    <span className="border border-[#BA1A1A]/30 px-1.5 py-0.5 bg-[#FFF5F5] text-[#93000A] font-semibold text-[9.5px] uppercase">
+                      Stok Habis
+                    </span>
+                  ) : isLowStock ? (
+                    <span className="border border-[#E8DCCF] px-1.5 py-0.5 bg-[#F5EFE6] text-[#8C6D46] font-semibold text-[9.5px]">
+                      Sisa {activeVariant.stock} Unit
+                    </span>
+                  ) : (
+                    <span className="border border-[#E2E8E5] px-1.5 py-0.5 bg-[#F1F5F3] text-[9.5px]">
+                      Stok Tersedia
+                    </span>
+                  )}
                 </div>
 
                 {/* Product Image: Proportional Height on Desktop to prevent massive cards */}
@@ -206,16 +224,26 @@ export const ProductCatalog: React.FC = () => {
                       </div>
                     </div>
 
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Pesan ${product.name} varian ${activeVariant.label} via WhatsApp`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 bg-[#18221E] hover:bg-[#3A6B5C] text-white py-2 text-label-caps tracking-wider transition-colors text-xs min-h-[36px]"
-                    >
-                      <WhatsAppIcon className="w-3.5 h-3.5 text-white" />
-                      <span>Pesan via WA</span>
-                    </a>
+                    {isOutOfStock ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full inline-flex items-center justify-center gap-1.5 bg-[#E2E8E5] text-[#52605A] py-2 text-label-caps tracking-wider text-xs min-h-[36px] cursor-not-allowed"
+                      >
+                        <span>Stok Habis</span>
+                      </button>
+                    ) : (
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Pesan ${product.name} varian ${activeVariant.label} via WhatsApp`}
+                        className="w-full inline-flex items-center justify-center gap-1.5 bg-[#18221E] hover:bg-[#3A6B5C] text-white py-2 text-label-caps tracking-wider transition-colors text-xs min-h-[36px]"
+                      >
+                        <WhatsAppIcon className="w-3.5 h-3.5 text-white" />
+                        <span>Pesan via WA</span>
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

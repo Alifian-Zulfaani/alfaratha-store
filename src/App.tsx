@@ -1,103 +1,89 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Navbar } from './components/layout/Navbar';
-import { HeroSection } from './components/sections/HeroSection';
-import { TrustMetrics } from './components/sections/TrustMetrics';
-import { ProductCatalog } from './components/sections/ProductCatalog';
+import React, { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { StoreProvider } from './context/StoreContext';
+import { LandingPage } from './pages/LandingPage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Asynchronous Below-The-Fold Sections
-// Dynamically imported on user interaction (scroll, touch, mousemove) to guarantee 0 ms TBT during initial page load
-const PackageBundles = lazy(() =>
-  import('./components/sections/PackageBundles').then((m) => ({ default: m.PackageBundles }))
+// Lazy load internal Auth, POS & Inventory routes so public Landing Page bundle stays minimal
+const LoginPage = lazy(() =>
+  import('./pages/LoginPage').then((m) => ({ default: m.LoginPage }))
 );
-const BentoAdvantages = lazy(() =>
-  import('./components/sections/BentoAdvantages').then((m) => ({ default: m.BentoAdvantages }))
+const AdminLayout = lazy(() =>
+  import('./components/layout/AdminLayout').then((m) => ({ default: m.AdminLayout }))
 );
-const OrderSteps = lazy(() =>
-  import('./components/sections/OrderSteps').then((m) => ({ default: m.OrderSteps }))
+const PosTerminalPage = lazy(() =>
+  import('./pages/admin/PosTerminalPage').then((m) => ({ default: m.PosTerminalPage }))
 );
-const Testimonials = lazy(() =>
-  import('./components/sections/Testimonials').then((m) => ({ default: m.Testimonials }))
+const InventoryPage = lazy(() =>
+  import('./pages/admin/InventoryPage').then((m) => ({ default: m.InventoryPage }))
 );
-const FAQSection = lazy(() =>
-  import('./components/sections/FAQSection').then((m) => ({ default: m.FAQSection }))
+const TransactionsPage = lazy(() =>
+  import('./pages/admin/TransactionsPage').then((m) => ({ default: m.TransactionsPage }))
 );
-const FinalCTA = lazy(() =>
-  import('./components/sections/FinalCTA').then((m) => ({ default: m.FinalCTA }))
+const ProfilePage = lazy(() =>
+  import('./pages/admin/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
-const Footer = lazy(() =>
-  import('./components/layout/Footer').then((m) => ({ default: m.Footer }))
-);
-const FloatingActions = lazy(() =>
-  import('./components/ui/FloatingActions').then((m) => ({ default: m.FloatingActions }))
+
+const RouteFallback: React.FC = () => (
+  <div className="min-h-screen bg-[#F8FAF9] flex items-center justify-center text-xs font-medium text-[#52605A]">
+    Memuat Alfaratha Workspace...
+  </div>
 );
 
 export const App: React.FC = () => {
-  const [renderBelowFold, setRenderBelowFold] = useState(false);
-
-  useEffect(() => {
-    const handleUserInteraction = () => {
-      setRenderBelowFold(true);
-    };
-
-    window.addEventListener('scroll', handleUserInteraction, { passive: true, once: true });
-    window.addEventListener('touchstart', handleUserInteraction, { passive: true, once: true });
-    window.addEventListener('mousemove', handleUserInteraction, { passive: true, once: true });
-    window.addEventListener('keydown', handleUserInteraction, { passive: true, once: true });
-
-    // Fallback: render after 6s of complete inactivity
-    const timer = setTimeout(handleUserInteraction, 6000);
-
-    return () => {
-      window.removeEventListener('scroll', handleUserInteraction);
-      window.removeEventListener('touchstart', handleUserInteraction);
-      window.removeEventListener('mousemove', handleUserInteraction);
-      window.removeEventListener('keydown', handleUserInteraction);
-      clearTimeout(timer);
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#F8FAF9] text-[#18221E] flex flex-col antialiased selection:bg-[#B9EEDA] selection:text-[#18221E]">
-      {/* 1. Critical Header, Hero & Product Catalog (Eagerly Rendered for Instant 0.6s FCP & LCP) */}
-      <Navbar />
+    <StoreProvider>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
 
-      <main className="flex-grow">
-        <HeroSection />
-        <TrustMetrics />
-        <ProductCatalog />
+          <Route path="/admin" element={<Navigate to="/admin/pos" replace />} />
+          <Route
+            path="/admin/pos"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PosTerminalPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/inventory"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <InventoryPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/transactions"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <TransactionsPage />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/profile"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ProfilePage />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* 2. Deep Below-The-Fold Sections Mounted On Demand for 0ms Total Blocking Time */}
-        {renderBelowFold && (
-          <Suspense fallback={null}>
-            <PackageBundles />
-            <BentoAdvantages />
-            <OrderSteps />
-
-            <section
-              className="w-full border-b border-[#E2E8E5] bg-[#F8FAF9] py-8 lg:py-12"
-              id="faq-testimoni"
-            >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
-                  <Testimonials />
-                  <FAQSection />
-                </div>
-              </div>
-            </section>
-
-            <FinalCTA />
-          </Suspense>
-        )}
-      </main>
-
-      {/* 3. Deferred Footer & Floating Actions */}
-      {renderBelowFold && (
-        <Suspense fallback={null}>
-          <Footer />
-          <FloatingActions />
-        </Suspense>
-      )}
-    </div>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </StoreProvider>
   );
 };
 
