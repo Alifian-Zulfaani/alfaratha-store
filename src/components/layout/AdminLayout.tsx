@@ -61,10 +61,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     };
   }, []);
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setLogoutConfirmOpen(false);
     setProfileMenuOpen(false);
-    logout();
+    await logout();
     navigate('/login');
   };
 

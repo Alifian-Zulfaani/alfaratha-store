@@ -48,8 +48,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [storageLocation, setStorageLocation] =
     useState<StorageLocation>('Ruang Pendingin');
   const [expiredDate, setExpiredDate] = useState('2027-08-31');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    setError('');
+    setIsSubmitting(false);
     if (editTarget) {
       setName(editTarget.product.name);
       setCategory(editTarget.product.category);
@@ -84,55 +88,66 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !isSubmitting) onClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setError('');
+    setIsSubmitting(true);
+
     const numericPrice = Math.max(0, parseInt(price || '0', 10) || 0);
     const numericCost = Math.max(0, parseInt(costPrice || '0', 10) || 0);
     const numericStock = Math.max(0, parseInt(stock || '0', 10) || 0);
     const numericMin = Math.max(0, parseInt(minStock || '5', 10) || 5);
 
-    if (editTarget) {
-      updateProductVariant(editTarget.product.id, editTarget.variant.id, {
-        name,
-        category,
-        origin,
-        description,
-        imageUrl,
-        variantLabel,
-        sku,
-        price: numericPrice,
-        costPrice: numericCost,
-        minStock: numericMin,
-        storageLocation,
-        expiredDate,
-      });
-    } else {
-      addProduct({
-        name,
-        category,
-        origin,
-        description,
-        imageUrl,
-        variantLabel,
-        sku,
-        price: numericPrice,
-        costPrice: numericCost,
-        stock: numericStock,
-        minStock: numericMin,
-        storageLocation,
-        expiredDate,
-      });
-    }
+    try {
+      const res = editTarget
+        ? await updateProductVariant(editTarget.product.id, editTarget.variant.id, {
+            name,
+            category,
+            origin,
+            description,
+            imageUrl,
+            variantLabel,
+            sku,
+            price: numericPrice,
+            costPrice: numericCost,
+            minStock: numericMin,
+            storageLocation,
+            expiredDate,
+          })
+        : await addProduct({
+            name,
+            category,
+            origin,
+            description,
+            imageUrl,
+            variantLabel,
+            sku,
+            price: numericPrice,
+            costPrice: numericCost,
+            stock: numericStock,
+            minStock: numericMin,
+            storageLocation,
+            expiredDate,
+          });
 
-    onClose();
+      if (!res.ok) {
+        setError(res.error || 'Gagal menyimpan data produk.');
+        return;
+      }
+
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -163,6 +178,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
         {/* Scrollable Form Body */}
         <form id="product-form" onSubmit={handleSubmit} className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4 text-xs">
+          {error && (
+            <div role="alert" className="p-3 bg-[#FFF5F5] border border-[#BA1A1A]/30 text-[#93000A] text-xs">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#52605A] mb-1">
@@ -360,17 +380,23 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         <div className="px-4 sm:px-5 py-3.5 bg-[#F8FAF9] border-t border-[#E2E8E5] flex items-center justify-end gap-2 shrink-0">
           <button
             type="button"
+            disabled={isSubmitting}
             onClick={onClose}
-            className="h-10 px-4 border border-[#E2E8E5] bg-white hover:bg-[#F1F5F3] text-xs font-semibold text-[#52605A] cursor-pointer transition-colors"
+            className="h-10 px-4 border border-[#E2E8E5] bg-white hover:bg-[#F1F5F3] disabled:opacity-50 text-xs font-semibold text-[#52605A] cursor-pointer transition-colors"
           >
             Batal
           </button>
           <button
             type="submit"
+            disabled={isSubmitting}
             form="product-form"
-            className="h-10 px-4 sm:px-5 bg-[#3A6B5C] hover:bg-[#2E5649] text-white text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap"
+            className="h-10 px-4 sm:px-5 bg-[#3A6B5C] hover:bg-[#2E5649] disabled:bg-[#7E8E87] disabled:cursor-not-allowed text-white text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap"
           >
-            {editTarget ? 'Simpan Perubahan' : 'Simpan Produk Baru'}
+            {isSubmitting
+              ? 'Menyimpan...'
+              : editTarget
+              ? 'Simpan Perubahan'
+              : 'Simpan Produk Baru'}
           </button>
         </div>
       </div>

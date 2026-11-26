@@ -15,6 +15,7 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({ targ
   const [qty, setQty] = useState<string>('10');
   const [reason, setReason] = useState<string>('Restock Supplier');
   const [error, setError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (target) {
@@ -23,17 +24,18 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({ targ
       setQty('10');
       setReason('Restock Supplier');
       setError('');
+      setIsSubmitting(false);
     }
   }, [target]);
 
   useEffect(() => {
     if (!target) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && !isSubmitting) onClose();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [target, onClose]);
+  }, [target, isSubmitting, onClose]);
 
   if (!target) return null;
 
@@ -54,19 +56,26 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({ targ
     setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (numericQty <= 0) {
       setError('Masukkan jumlah stok lebih dari 0.');
       return;
     }
 
-    const res = adjustStock(product.id, variant.id, delta, adjType, reason);
-    if (!res.ok) {
-      setError(res.error || 'Gagal memperbarui stok.');
-      return;
+    setError('');
+    setIsSubmitting(true);
+    try {
+      const res = await adjustStock(product.id, variant.id, delta, adjType, reason);
+      if (!res.ok) {
+        setError(res.error || 'Gagal memperbarui stok.');
+        return;
+      }
+      onClose();
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   return (
@@ -225,17 +234,19 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({ targ
         <div className="px-4 sm:px-5 py-3.5 bg-[#F8FAF9] border-t border-[#E2E8E5] flex items-center justify-end gap-2 shrink-0">
           <button
             type="button"
+            disabled={isSubmitting}
             onClick={onClose}
-            className="h-10 px-4 border border-[#E2E8E5] bg-white hover:bg-[#F1F5F3] text-xs font-semibold text-[#52605A] cursor-pointer transition-colors"
+            className="h-10 px-4 border border-[#E2E8E5] bg-white hover:bg-[#F1F5F3] disabled:opacity-50 text-xs font-semibold text-[#52605A] cursor-pointer transition-colors"
           >
             Batal
           </button>
           <button
             type="submit"
+            disabled={isSubmitting}
             form="stock-adj-form"
-            className="h-10 px-4 sm:px-5 bg-[#3A6B5C] hover:bg-[#2E5649] text-white text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap"
+            className="h-10 px-4 sm:px-5 bg-[#3A6B5C] hover:bg-[#2E5649] disabled:bg-[#7E8E87] disabled:cursor-not-allowed text-white text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap"
           >
-            Simpan Perubahan Stok
+            {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan Stok'}
           </button>
         </div>
       </div>

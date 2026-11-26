@@ -628,9 +628,9 @@ export const InventoryPage: React.FC = () => {
         description="Seluruh varian kemasan di dalam produk ini juga akan ikut dihapus dari halaman Kasir POS dan Katalog Toko. Tindakan ini tidak dapat dibatalkan."
         confirmLabel="Ya, Hapus Produk"
         onCancel={() => setDeleteTarget(null)}
-        onConfirm={() => {
+        onConfirm={async () => {
           if (deleteTarget) {
-            deleteProduct(deleteTarget.id);
+            await deleteProduct(deleteTarget.id);
             setDeleteTarget(null);
           }
         }}

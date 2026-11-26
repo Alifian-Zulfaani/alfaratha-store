@@ -22,7 +22,16 @@ export const ProfilePage: React.FC = () => {
   const [name, setName] = useState(currentUser?.name || '');
   const [branch, setBranch] = useState(currentUser?.branch || 'Alfaratha Store');
   const [savedNotice, setSavedNotice] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name);
+      setBranch(currentUser.branch);
+    }
+  }, [currentUser]);
 
   const staffStats = useMemo(() => {
     const staffTrx = transactions.filter(
@@ -35,16 +44,28 @@ export const ProfilePage: React.FC = () => {
     };
   }, [transactions, currentUser?.name]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({ name, branch });
-    setSavedNotice(true);
-    setTimeout(() => setSavedNotice(false), 3000);
+    if (isSaving) return;
+    setSaveError('');
+    setSavedNotice(false);
+    setIsSaving(true);
+    try {
+      const res = await updateProfile({ name, branch });
+      if (!res.ok) {
+        setSaveError(res.error || 'Gagal menyimpan profil.');
+        return;
+      }
+      setSavedNotice(true);
+      setTimeout(() => setSavedNotice(false), 3000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setLogoutModalOpen(false);
-    logout();
+    await logout();
     navigate('/login');
   };
 
@@ -146,6 +167,12 @@ export const ProfilePage: React.FC = () => {
               </div>
             )}
 
+            {saveError && (
+              <div role="alert" className="mb-4 p-3 bg-[#FFF5F5] border border-[#BA1A1A]/30 text-[#93000A] text-xs">
+                {saveError}
+              </div>
+            )}
+
             <form id="profile-form" onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -227,11 +254,12 @@ export const ProfilePage: React.FC = () => {
             </span>
             <button
               type="submit"
+              disabled={isSaving}
               form="profile-form"
-              className="h-10 px-5 bg-[#3A6B5C] hover:bg-[#2E5649] text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shrink-0 w-full sm:w-auto"
+              className="h-10 px-5 bg-[#3A6B5C] hover:bg-[#2E5649] disabled:bg-[#7E8E87] disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shrink-0 w-full sm:w-auto"
             >
               <Save className="w-4 h-4" />
-              <span>Simpan Perubahan</span>
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
             </button>
           </div>
         </section>

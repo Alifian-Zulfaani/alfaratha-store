@@ -4,23 +4,24 @@ import { Lock, Mail, ArrowRight, Sparkles, ArrowLeft, ShieldCheck, AlertCircle }
 import { useStore, DEMO_CREDENTIALS } from '../context/StoreContext';
 
 export const LoginPage: React.FC = () => {
-  const { login, currentUser } = useStore();
+  const { login, currentUser, isAuthLoading } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fromPath =
     (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ||
     '/admin/pos';
 
   useEffect(() => {
-    if (currentUser) {
+    if (!isAuthLoading && currentUser) {
       navigate(fromPath, { replace: true });
     }
-  }, [currentUser, navigate, fromPath]);
+  }, [currentUser, isAuthLoading, navigate, fromPath]);
 
   const handleFillDemo = () => {
     setIdentifier(DEMO_CREDENTIALS.email);
@@ -28,17 +29,23 @@ export const LoginPage: React.FC = () => {
     setError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError('');
+    setIsSubmitting(true);
 
-    const result = login(identifier, password);
-    if (!result.ok) {
-      setError(result.error || 'Gagal masuk ke sistem.');
-      return;
+    try {
+      const result = await login(identifier, password);
+      if (!result.ok) {
+        setError(result.error || 'Gagal masuk ke sistem.');
+        return;
+      }
+
+      navigate(fromPath, { replace: true });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    navigate(fromPath, { replace: true });
   };
 
   return (
@@ -155,10 +162,11 @@ export const LoginPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full h-11 bg-[#3A6B5C] hover:bg-[#2E5649] text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
+              disabled={isSubmitting}
+              className="w-full h-11 bg-[#3A6B5C] hover:bg-[#2E5649] disabled:bg-[#7E8E87] disabled:cursor-not-allowed text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
             >
-              <span>Masuk ke Terminal Kasir</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>{isSubmitting ? 'Memverifikasi Akun...' : 'Masuk ke Terminal Kasir'}</span>
+              {!isSubmitting && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
 

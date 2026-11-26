@@ -67,6 +67,7 @@ export const PosTerminalPage: React.FC = () => {
   const [activeReceipt, setActiveReceipt] = useState<TransactionRecord | null>(null);
   const [clearCartModalOpen, setClearCartModalOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<'catalog' | 'cart'>('catalog');
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
   const scrollCategories = (direction: 'left' | 'right') => {
     if (!categoryTrackRef.current) return;
@@ -248,33 +249,39 @@ export const PosTerminalPage: React.FC = () => {
     setErrorMsg('');
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (isProcessingCheckout) return;
     setErrorMsg('');
     if (cart.length === 0) {
       setErrorMsg('Tambahkan minimal 1 produk ke keranjang terlebih dahulu.');
       return;
     }
 
-    const res = completeCheckout({
-      items: cart,
-      customerName: customerName || 'Pelanggan Walk-In',
-      pricingMode,
-      paymentMethod,
-      cashReceived: paymentMethod === 'cash' ? numericCashReceived : grandTotal,
-      notes,
-    });
+    setIsProcessingCheckout(true);
+    try {
+      const res = await completeCheckout({
+        items: cart,
+        customerName: customerName || 'Pelanggan Walk-In',
+        pricingMode,
+        paymentMethod,
+        cashReceived: paymentMethod === 'cash' ? numericCashReceived : grandTotal,
+        notes,
+      });
 
-    if (!res.ok) {
-      setErrorMsg(res.error || 'Checkout gagal diproses.');
-      return;
-    }
+      if (!res.ok) {
+        setErrorMsg(res.error || 'Checkout gagal diproses.');
+        return;
+      }
 
-    if (res.transaction) {
-      setActiveReceipt(res.transaction);
-      setCart([]);
-      setCashReceivedInput('');
-      setCustomerName('');
-      setNotes('');
+      if (res.transaction) {
+        setActiveReceipt(res.transaction);
+        setCart([]);
+        setCashReceivedInput('');
+        setCustomerName('');
+        setNotes('');
+      }
+    } finally {
+      setIsProcessingCheckout(false);
     }
   };
 
@@ -286,7 +293,7 @@ export const PosTerminalPage: React.FC = () => {
         searchInputRef.current?.focus();
       } else if (e.key === 'F9') {
         e.preventDefault();
-        handleCheckout();
+        void handleCheckout();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -817,16 +824,20 @@ export const PosTerminalPage: React.FC = () => {
             {/* Primary Checkout Button */}
             <button
               type="button"
-              onClick={handleCheckout}
-              disabled={cart.length === 0}
+              onClick={() => void handleCheckout()}
+              disabled={cart.length === 0 || isProcessingCheckout}
               className={`w-full h-11 font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${
-                cart.length === 0
+                cart.length === 0 || isProcessingCheckout
                   ? 'bg-[#E2E8E5] text-[#7E8E87] cursor-not-allowed'
                   : 'bg-[#3A6B5C] hover:bg-[#2E5649] text-white cursor-pointer'
               }`}
             >
               <Printer className="w-4 h-4" />
-              <span>Selesaikan Transaksi &amp; Struk (F9)</span>
+              <span>
+                {isProcessingCheckout
+                  ? 'Memproses Transaksi...'
+                  : 'Selesaikan Transaksi & Struk (F9)'}
+              </span>
             </button>
           </div>
         </aside>
