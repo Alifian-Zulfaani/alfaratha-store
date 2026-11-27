@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { MapPin, Check, ExternalLink, Navigation } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
+import { useStore } from '../../context/StoreContext';
 
 export const FinalCTA: React.FC = () => {
+  const { siteContent } = useStore();
+  const { finalCta, general } = siteContent;
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   return (
@@ -20,23 +23,24 @@ export const FinalCTA: React.FC = () => {
               <div className="inline-flex items-center gap-2 border border-[#3A6B5C]/40 bg-[#3A6B5C]/15 px-3 py-1 mb-4 w-fit">
                 <span className="w-1.5 h-1.5 bg-[#B9EEDA]" />
                 <span className="text-label-caps text-[#B9EEDA] uppercase tracking-widest font-semibold">
-                  Pusat Oleh-Oleh Haji &amp; Umroh
+                  {finalCta.badge}
                 </span>
               </div>
 
               <h2 className="font-headline text-2xl sm:text-3xl lg:text-4xl text-white tracking-tight mb-4 leading-tight">
-                Sambut Hangat Keluarga &amp; Tamu dengan Buah Tangan Terbaik.
+                {finalCta.heading}
               </h2>
 
               <p className="text-xs sm:text-sm text-[#DAE5DE] mb-6 sm:mb-8 leading-relaxed max-w-xl">
-                Tidak perlu tergesa-gesa berbelanja di pasar Tanah Suci di sela ibadah Anda. Kunjungi toko kami langsung atau pesan antar dengan jaminan kurma segar sampai ke rumah.
+                {finalCta.description}
               </p>
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
                 <a
                   href={generateWhatsAppUrl({
-                    customMessage: 'Halo Alfaratha, saya ingin pesan paket oleh-oleh sekarang.',
+                    phone: general.whatsappNumber,
+                    customMessage: finalCta.primaryWaMessage,
                   })}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -44,32 +48,28 @@ export const FinalCTA: React.FC = () => {
                   aria-label="Pesan paket oleh-oleh via WhatsApp Alfaratha"
                 >
                   <WhatsAppIcon className="w-4 h-4 text-white" />
-                  <span>Pesan Sekarang via WhatsApp</span>
+                  <span>{finalCta.primaryBtnLabel}</span>
                 </a>
 
                 <a
-                  href="https://maps.app.goo.gl/mFNWPrfMV3TEtqqV8"
+                  href={general.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-white/30 text-white hover:bg-white/10 px-5 py-3.5 text-label-caps tracking-wider transition-colors"
                   aria-label="Buka lokasi Alfaratha Kurma di Google Maps"
                 >
                   <MapPin className="w-4 h-4 text-[#E6C093]" />
-                  <span>Buka di Google Maps ↗</span>
+                  <span>{finalCta.secondaryBtnLabel}</span>
                 </a>
               </div>
 
               {/* Trust Guarantees */}
               <div className="pt-6 border-t border-white/10 flex flex-wrap items-center gap-5 text-label-code text-[#DAE5DE]">
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-[#B9EEDA]" /> Respon Kilat CS
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-[#B9EEDA]" /> Garansi 100% Produk Asli
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-[#B9EEDA]" /> Invoice Resmi &amp; Kwitansi KBIH
-                </span>
+                {finalCta.guarantees.map((guarantee, idx) => (
+                  <span key={`${guarantee}-${idx}`} className="flex items-center gap-1.5">
+                    <Check className="w-4 h-4 text-[#B9EEDA]" /> {guarantee}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -79,10 +79,10 @@ export const FinalCTA: React.FC = () => {
               <div className="p-3 border-b border-[#26332E] flex items-center justify-between text-label-code">
                 <span className="text-[#B9EEDA] flex items-center gap-1.5 font-semibold">
                   <MapPin className="w-3.5 h-3.5 text-[#E6C093]" />
-                  Alfaratha Kurma
+                  {finalCta.mapTitle}
                 </span>
                 <span className="border border-[#26332E] bg-[#18221E] px-2 py-0.5 text-label-caps text-[#DAE5DE]">
-                  Toko Alfaratha
+                  {finalCta.mapBadge}
                 </span>
               </div>
 
@@ -90,8 +90,8 @@ export const FinalCTA: React.FC = () => {
               <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[280px] bg-[#18221E] overflow-hidden">
                 {isMapLoaded ? (
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.9308063519093!2d110.63708807390003!3d-7.690575276149168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a41ca94925ae9%3A0xb527c0ee117b4d15!2sAlfaratha%20Kurma!5e0!3m2!1sen!2sid!4v1795354979337!5m2!1sen!2sid"
-                    title="Lokasi Alfaratha Kurma di Google Maps"
+                    src={general.googleMapsEmbedUrl}
+                    title={`Lokasi ${finalCta.mapTitle} di Google Maps`}
                     className="w-full h-full border-0"
                     loading="lazy"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -107,10 +107,10 @@ export const FinalCTA: React.FC = () => {
                         <MapPin className="w-6 h-6 text-[#E6C093]" />
                       </div>
                       <h3 className="font-headline text-base text-white font-semibold mb-1">
-                        Kunjungi Toko Alfaratha
+                        {finalCta.mapCardTitle}
                       </h3>
                       <p className="text-xs text-[#DAE5DE] mb-4">
-                        Tersedia display kurma segar, sampel rasa gratis, dan konsultasi paket langsung di lokasi.
+                        {finalCta.mapCardDesc}
                       </p>
                       <button
                         type="button"
@@ -119,7 +119,7 @@ export const FinalCTA: React.FC = () => {
                         aria-label="Tampilkan Peta Interaktif Google Maps"
                       >
                         <Navigation className="w-3.5 h-3.5" />
-                        <span>Tampilkan Peta Interaktif</span>
+                        <span>{finalCta.mapActionLabel}</span>
                       </button>
                     </div>
                   </div>
@@ -129,10 +129,10 @@ export const FinalCTA: React.FC = () => {
               {/* Map Footer Strip with Direct Google Maps Link */}
               <div className="p-3 border-t border-[#26332E] flex items-center justify-between text-label-code bg-[#18221E]">
                 <span className="text-[#DAE5DE] text-xs">
-                  Senin – Minggu: 07:30 – 22:00 WIB
+                  {general.operatingHours}
                 </span>
                 <a
-                  href="https://maps.app.goo.gl/mFNWPrfMV3TEtqqV8"
+                  href={general.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#E6C093] hover:text-white transition-colors flex items-center gap-1 font-semibold text-label-caps"

@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
+import { useStore } from '../../context/StoreContext';
 
 export const Navbar: React.FC = () => {
+  const { siteContent } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('katalog');
+  const waPhone = siteContent.general.whatsappNumber;
 
   const navLinks = [
     { id: 'katalog', label: 'Katalog Kurma', href: '#katalog-produk' },
@@ -37,7 +40,7 @@ export const Navbar: React.FC = () => {
             A
           </div>
           <span className="font-headline text-[17px] lg:text-xl text-[#18221E] tracking-tight font-semibold">
-            Alfaratha Store
+            {siteContent.general.storeName}
           </span>
         </a>
 
@@ -65,7 +68,7 @@ export const Navbar: React.FC = () => {
         {/* Action CTAs */}
         <div className="flex items-center gap-2 lg:gap-3 shrink-0">
           <a
-            href={generateWhatsAppUrl()}
+            href={generateWhatsAppUrl({ phone: waPhone })}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 lg:gap-2 bg-[#3A6B5C] hover:bg-[#2E5649] text-white px-3 py-1.5 lg:px-4 lg:py-2 text-xs lg:text-sm font-semibold tracking-wide transition-colors"
@@ -106,7 +109,7 @@ export const Navbar: React.FC = () => {
           ))}
           <div className="pt-2 mt-1 border-t border-[#E2E8E5] flex flex-col gap-2 px-1">
             <a
-              href={generateWhatsAppUrl()}
+              href={generateWhatsAppUrl({ phone: waPhone })}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full inline-flex items-center justify-center gap-2 bg-[#3A6B5C] hover:bg-[#2E5649] text-white py-2.5 text-xs font-semibold tracking-wide transition-colors"

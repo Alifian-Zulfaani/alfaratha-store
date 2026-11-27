@@ -6,7 +6,8 @@ import { ProductCategory, NormalizedProduct } from '../../types';
 import { generateWhatsAppUrl, formatIDR } from '../../utils/whatsapp';
 
 export const ProductCatalog: React.FC = () => {
-  const { products } = useStore();
+  const { products, siteContent } = useStore();
+  const { catalogHeaders, general } = siteContent;
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('all');
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
 
@@ -45,13 +46,13 @@ export const ProductCatalog: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-1.5 text-[#3A6B5C] text-label-caps uppercase tracking-widest mb-1 font-semibold">
               <span className="w-1.5 h-1.5 bg-[#3A6B5C]" />
-              <span>Pilihan Panen Segar &amp; Oleh-Oleh</span>
+              <span>{catalogHeaders.productEyebrow}</span>
             </div>
             <h2 className="font-headline text-xl sm:text-2xl lg:text-3xl text-[#18221E] font-semibold tracking-tight">
-              Katalog Produk Pilihan Alfaratha
+              {catalogHeaders.productHeading}
             </h2>
             <p className="text-xs sm:text-sm text-[#52605A] mt-0.5">
-              Tersedia dalam kemasan pouch higienis, box retail, hingga kartonan grosir.
+              {catalogHeaders.productSubtitle}
             </p>
           </div>
 
@@ -98,6 +99,7 @@ export const ProductCatalog: React.FC = () => {
               productName: product.name,
               variantLabel: activeVariant.label,
               price: activeVariant.price,
+              phone: general.whatsappNumber,
             });
 
             return (
@@ -259,17 +261,18 @@ export const ProductCatalog: React.FC = () => {
             </div>
             <div>
               <h3 className="font-headline text-sm sm:text-base text-[#18221E] font-semibold">
-                Butuh Pembelian Kartonan / Grosir Masjid &amp; KBIH?
+                {catalogHeaders.wholesaleTitle}
               </h3>
               <p className="text-xs text-[#52605A]">
-                Dapatkan daftar harga khusus partai besar untuk pengajian, pondok pesantren, dan majelis taklim.
+                {catalogHeaders.wholesaleSubtitle}
               </p>
             </div>
           </div>
 
           <a
             href={generateWhatsAppUrl({
-              customMessage: 'Halo Admin Alfaratha, saya minta Pricelist Grosir Kartonan Kurma & Oleh-oleh Alfaratha.',
+              phone: general.whatsappNumber,
+              customMessage: catalogHeaders.wholesaleWaMessage,
             })}
             target="_blank"
             rel="noopener noreferrer"
@@ -277,7 +280,7 @@ export const ProductCatalog: React.FC = () => {
             className="shrink-0 w-full md:w-auto inline-flex items-center justify-center gap-2 bg-[#18221E] hover:bg-[#3A6B5C] text-white px-4 py-2 text-label-caps tracking-wider transition-colors min-h-[38px] text-xs"
           >
             <WhatsAppIcon className="w-3.5 h-3.5 text-white" />
-            <span>Minta Pricelist via WA</span>
+            <span>{catalogHeaders.wholesaleBtnLabel}</span>
             <Download className="w-3.5 h-3.5" />
           </a>
         </div>

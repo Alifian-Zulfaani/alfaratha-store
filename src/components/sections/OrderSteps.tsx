@@ -1,29 +1,9 @@
 import React from 'react';
+import { useStore } from '../../context/StoreContext';
 
 export const OrderSteps: React.FC = () => {
-  const steps = [
-    {
-      step: '01',
-      num: '1',
-      title: 'Pilih Katalog atau Paket Dus',
-      desc: 'Tentukan jenis kurma, jumlah dus paket oleh-oleh, atau isian custom sesuai rencana jumlah tamu Anda.',
-      isHighlight: false,
-    },
-    {
-      step: '02',
-      num: '2',
-      title: 'Konfirmasi Jadwal via WhatsApp',
-      desc: 'Admin menghitung total diskon paket, ongkir termurah, dan konfirmasi cetak nama jamaah pada kartu ucapan gratis.',
-      isHighlight: false,
-    },
-    {
-      step: '03',
-      num: '3',
-      title: 'Pengiriman Aman ke Rumah Anda',
-      desc: 'Paket dipacking rapi berlapis bubble wrap dan kardus tebal, siap sampai di kediaman sebelum jadwal kepulangan jamaah.',
-      isHighlight: true,
-    },
-  ];
+  const { siteContent } = useStore();
+  const { eyebrow, heading, hoursBadge, steps } = siteContent.orderSteps;
 
   return (
     <section className="w-full border-b border-[#E2E8E5] bg-white py-8 lg:py-12" id="alur-pemesanan">
@@ -31,14 +11,14 @@ export const OrderSteps: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#E2E8E5] mb-5 sm:mb-6">
           <div>
             <span className="text-label-caps text-[#3A6B5C] uppercase tracking-widest block mb-1 font-semibold">
-              Tata Cara Pemesanan
+              {eyebrow}
             </span>
             <h2 className="font-headline text-xl sm:text-2xl lg:text-3xl text-[#18221E] font-semibold tracking-tight">
-              Mudah Dalam 3 Langkah Sederhana
+              {heading}
             </h2>
           </div>
           <span className="text-label-code text-[#52605A] text-xs">
-            Layanan Admin Aktif: 07.30 - 22.00 WIB
+            {hoursBadge}
           </span>
         </div>
 

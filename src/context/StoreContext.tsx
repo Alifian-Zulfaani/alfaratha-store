@@ -20,8 +20,19 @@ import {
   PricingMode,
   PaymentMethod,
   NewProductInput,
+  CmsPackageBundle,
+  CmsTestimonial,
+  CmsFaqItem,
+  SiteContentBundle,
+  SiteSectionKey,
 } from '../types';
 import { PRODUCTS_DATA } from '../data/products';
+import {
+  DEFAULT_FAQS,
+  DEFAULT_PACKAGE_BUNDLES,
+  DEFAULT_SITE_CONTENT,
+  DEFAULT_TESTIMONIALS,
+} from '../data/cmsDefaults';
 import { supabase } from '../lib/supabase';
 import {
   adjustVariantStockInDb,
@@ -36,6 +47,19 @@ import {
   updateProductVariantInDb,
   updateStaffProfileInDb,
 } from '../services/storeApi';
+import {
+  deleteFaqInDb,
+  deletePackageBundleInDb,
+  deleteTestimonialInDb,
+  fetchFaqsFromDb,
+  fetchPackageBundlesFromDb,
+  fetchSiteContentFromDb,
+  fetchTestimonialsFromDb,
+  saveFaqInDb,
+  savePackageBundleInDb,
+  saveSiteSectionInDb,
+  saveTestimonialInDb,
+} from '../services/cmsApi';
 
 export const DEMO_CREDENTIALS = {
   email: 'kasir@alfaratha.store',
@@ -142,6 +166,10 @@ interface StoreContextValue {
   products: NormalizedProduct[];
   transactions: TransactionRecord[];
   stockLogs: StockLog[];
+  packageBundles: CmsPackageBundle[];
+  testimonials: CmsTestimonial[];
+  faqs: CmsFaqItem[];
+  siteContent: SiteContentBundle;
   currentUser: StaffUser | null;
   isAuthLoading: boolean;
   isCatalogLoading: boolean;
@@ -176,6 +204,20 @@ interface StoreContextValue {
     }
   ) => Promise<ActionResult>;
   deleteProduct: (productId: string) => Promise<ActionResult>;
+  savePackageBundle: (
+    input: Omit<CmsPackageBundle, 'id'> & { id?: string }
+  ) => Promise<ActionResult>;
+  deletePackageBundle: (id: string) => Promise<ActionResult>;
+  saveTestimonial: (
+    input: Omit<CmsTestimonial, 'id' | 'initials'> & { id?: string; initials?: string }
+  ) => Promise<ActionResult>;
+  deleteTestimonial: (id: string) => Promise<ActionResult>;
+  saveFaq: (input: Omit<CmsFaqItem, 'id'> & { id?: string }) => Promise<ActionResult>;
+  deleteFaq: (id: string) => Promise<ActionResult>;
+  saveSiteSection: <K extends SiteSectionKey>(
+    key: K,
+    content: SiteContentBundle[K]
+  ) => Promise<ActionResult>;
   refreshStoreData: () => Promise<void>;
 }
 
@@ -185,6 +227,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [products, setProducts] = useState<NormalizedProduct[]>(buildOptimisticProducts);
   const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
   const [stockLogs, setStockLogs] = useState<StockLog[]>([]);
+  const [packageBundles, setPackageBundles] = useState<CmsPackageBundle[]>(DEFAULT_PACKAGE_BUNDLES);
+  const [testimonials, setTestimonials] = useState<CmsTestimonial[]>(DEFAULT_TESTIMONIALS);
+  const [faqs, setFaqs] = useState<CmsFaqItem[]>(DEFAULT_FAQS);
+  const [siteContent, setSiteContent] = useState<SiteContentBundle>(DEFAULT_SITE_CONTENT);
   const [currentUser, setCurrentUser] = useState<StaffUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [isCatalogLoading, setIsCatalogLoading] = useState<boolean>(true);
@@ -202,6 +248,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
+  const refreshCmsContent = useCallback(async () => {
+    try {
+      const [dbBundles, dbTestimonials, dbFaqs, dbSiteContent] = await Promise.all([
+        fetchPackageBundlesFromDb(),
+        fetchTestimonialsFromDb(),
+        fetchFaqsFromDb(),
+        fetchSiteContentFromDb(),
+      ]);
+      setPackageBundles(dbBundles);
+      setTestimonials(dbTestimonials);
+      setFaqs(dbFaqs);
+      setSiteContent(dbSiteContent);
+    } catch (err) {
+      console.error('Gagal memuat konten CMS etalase dari Supabase:', err);
+    }
+  }, []);
+
   const refreshAdminRecords = useCallback(async () => {
     try {
       const [dbTransactions, dbLogs] = await Promise.all([
@@ -216,17 +279,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const refreshStoreData = useCallback(async () => {
-    await refreshProducts();
+    await Promise.all([refreshProducts(), refreshCmsContent()]);
     if (currentUser) {
       await refreshAdminRecords();
     }
-  }, [refreshProducts, refreshAdminRecords, currentUser]);
+  }, [refreshProducts, refreshCmsContent, refreshAdminRecords, currentUser]);
 
-  // Hydrate initial public catalog & restore active Supabase Auth session
+  // Hydrate initial public catalog & CMS + restore active Supabase Auth session
   useEffect(() => {
     let active = true;
 
     void refreshProducts();
+    void refreshCmsContent();
 
     const loadSessionAndProfile = async (userId: string | null) => {
       if (!active) return;
@@ -282,46 +346,56 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       active = false;
       subscription.unsubscribe();
     };
-  }, [refreshProducts, refreshAdminRecords]);
+  }, [refreshProducts, refreshCmsContent, refreshAdminRecords]);
 
-  // Realtime DB sync for live stock & transaction updates across tabs/terminals
+  // Realtime DB sync for catalog, CMS landing content & admin records
   useEffect(() => {
-    const triggerSync = (includeAdmin: boolean) => {
+    const triggerSync = (scope: 'catalog' | 'cms' | 'admin') => {
       if (realtimeTimerRef.current) {
         window.clearTimeout(realtimeTimerRef.current);
       }
       realtimeTimerRef.current = window.setTimeout(() => {
-        void refreshProducts();
-        if (includeAdmin && currentUser) {
-          void refreshAdminRecords();
+        if (scope === 'catalog') {
+          void refreshProducts();
+        } else if (scope === 'cms') {
+          void refreshCmsContent();
+        } else {
+          void refreshProducts();
+          if (currentUser) {
+            void refreshAdminRecords();
+          }
         }
       }, 250);
     };
 
     const channel = supabase
       .channel('alfaratha-realtime-sync')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'products' },
-        () => triggerSync(false)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () =>
+        triggerSync('catalog')
       )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'product_variants' },
-        () => triggerSync(false)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_variants' }, () =>
+        triggerSync('catalog')
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'package_bundles' }, () =>
+        triggerSync('cms')
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, () =>
+        triggerSync('cms')
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, () =>
+        triggerSync('cms')
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_contents' }, () =>
+        triggerSync('cms')
       );
 
     if (currentUser) {
       channel
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'transactions' },
-          () => triggerSync(true)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () =>
+          triggerSync('admin')
         )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'stock_logs' },
-          () => triggerSync(true)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_logs' }, () =>
+          triggerSync('admin')
         );
     }
 
@@ -333,7 +407,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       void supabase.removeChannel(channel);
     };
-  }, [currentUser, refreshProducts, refreshAdminRecords]);
+  }, [currentUser, refreshProducts, refreshCmsContent, refreshAdminRecords]);
 
   const login = useCallback(
     async (identifier: string, password: string): Promise<ActionResult> => {
@@ -505,12 +579,84 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [refreshProducts]
   );
 
+  const savePackageBundle = useCallback(
+    async (input: Omit<CmsPackageBundle, 'id'> & { id?: string }): Promise<ActionResult> => {
+      const res = await savePackageBundleInDb(input);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
+  const deletePackageBundle = useCallback(
+    async (id: string): Promise<ActionResult> => {
+      const res = await deletePackageBundleInDb(id);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
+  const saveTestimonial = useCallback(
+    async (
+      input: Omit<CmsTestimonial, 'id' | 'initials'> & { id?: string; initials?: string }
+    ): Promise<ActionResult> => {
+      const res = await saveTestimonialInDb(input);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
+  const deleteTestimonial = useCallback(
+    async (id: string): Promise<ActionResult> => {
+      const res = await deleteTestimonialInDb(id);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
+  const saveFaq = useCallback(
+    async (input: Omit<CmsFaqItem, 'id'> & { id?: string }): Promise<ActionResult> => {
+      const res = await saveFaqInDb(input);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
+  const deleteFaq = useCallback(
+    async (id: string): Promise<ActionResult> => {
+      const res = await deleteFaqInDb(id);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
+  const saveSiteSection = useCallback(
+    async <K extends SiteSectionKey>(
+      key: K,
+      content: SiteContentBundle[K]
+    ): Promise<ActionResult> => {
+      const res = await saveSiteSectionInDb(key, content);
+      if (res.ok) await refreshCmsContent();
+      return res;
+    },
+    [refreshCmsContent]
+  );
+
   return (
     <StoreContext.Provider
       value={{
         products,
         transactions,
         stockLogs,
+        packageBundles,
+        testimonials,
+        faqs,
+        siteContent,
         currentUser,
         isAuthLoading,
         isCatalogLoading,
@@ -522,6 +668,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addProduct,
         updateProductVariant,
         deleteProduct,
+        savePackageBundle,
+        deletePackageBundle,
+        saveTestimonial,
+        deleteTestimonial,
+        saveFaq,
+        deleteFaq,
+        saveSiteSection,
         refreshStoreData,
       }}
     >

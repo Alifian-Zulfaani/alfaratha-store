@@ -23,6 +23,9 @@ const TransactionsPage = lazy(() =>
 const ProfilePage = lazy(() =>
   import('./pages/admin/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
+const ContentCmsPage = lazy(() =>
+  import('./pages/admin/ContentCmsPage').then((m) => ({ default: m.ContentCmsPage }))
+);
 
 const RouteFallback: React.FC = () => (
   <div className="min-h-screen bg-[#F8FAF9] flex items-center justify-center text-xs font-medium text-[#52605A]">
@@ -75,6 +78,16 @@ export const App: React.FC = () => {
               <ProtectedRoute>
                 <AdminLayout>
                   <ProfilePage />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/cms"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ContentCmsPage />
                 </AdminLayout>
               </ProtectedRoute>
             }

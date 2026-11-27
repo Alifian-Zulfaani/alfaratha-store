@@ -1,6 +1,7 @@
 export const DEFAULT_WHATSAPP_NUMBER = '6281554431137';
 
 export interface WhatsAppOrderParams {
+  phone?: string;
   productName?: string;
   variantLabel?: string;
   price?: number;
@@ -22,7 +23,8 @@ export function formatIDR(amount: number): string {
  * Menghasilkan URL resmi WhatsApp dengan teks terformat ramah dan profesional dalam Bahasa Indonesia.
  */
 export function generateWhatsAppUrl(params?: WhatsAppOrderParams): string {
-  const phone = DEFAULT_WHATSAPP_NUMBER;
+  const cleanedPhone = params?.phone?.replace(/\D/g, '');
+  const phone = cleanedPhone || DEFAULT_WHATSAPP_NUMBER;
   let text = '';
 
   if (params?.customMessage) {

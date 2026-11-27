@@ -2,8 +2,18 @@ import React from 'react';
 import { Snowflake, Luggage, Sliders, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
+import { useStore } from '../../context/StoreContext';
+import { DEFAULT_SITE_CONTENT } from '../../data/cmsDefaults';
 
 export const BentoAdvantages: React.FC = () => {
+  const { siteContent } = useStore();
+  const { bentoAdvantages, general } = siteContent;
+  const fallbackCards = DEFAULT_SITE_CONTENT.bentoAdvantages.cards;
+  const card0 = bentoAdvantages.cards[0] ?? fallbackCards[0];
+  const card1 = bentoAdvantages.cards[1] ?? fallbackCards[1];
+  const card2 = bentoAdvantages.cards[2] ?? fallbackCards[2];
+  const card3 = bentoAdvantages.cards[3] ?? fallbackCards[3];
+
   return (
     <section className="w-full border-b border-[#E2E8E5] bg-white py-8 lg:py-12" id="standar-mutu">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -11,14 +21,14 @@ export const BentoAdvantages: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 pb-4 border-b border-[#E2E8E5] mb-5 sm:mb-6">
           <div>
             <span className="text-label-caps text-[#3A6B5C] uppercase tracking-widest block mb-1 font-semibold">
-              Standar Mutu Alfaratha
+              {bentoAdvantages.eyebrow}
             </span>
             <h2 className="font-headline text-xl sm:text-2xl lg:text-3xl text-[#18221E] font-semibold tracking-tight">
-              Kualitas Segar &amp; Ketenangan Ibadah
+              {bentoAdvantages.heading}
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-[#52605A] max-w-md leading-relaxed">
-            Penanganan rapi dan higienis dari penyimpanan hingga sampai di rumah Anda.
+            {bentoAdvantages.subtitle}
           </p>
         </div>
 
@@ -32,24 +42,24 @@ export const BentoAdvantages: React.FC = () => {
                   <Snowflake className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span className="text-label-code border border-[#3A6B5C]/40 text-[#3A6B5C] bg-[#F1F5F3] px-2 py-0.5 text-[10px] sm:text-xs">
-                  PENYIMPANAN SEJUK
+                  {card0.tag}
                 </span>
               </div>
               <h3 className="font-headline text-base sm:text-lg text-[#18221E] font-bold mb-1.5">
-                Kualitas Kurma Tetap Segar &amp; Empuk
+                {card0.title}
               </h3>
               <p className="text-xs sm:text-sm text-[#52605A] leading-relaxed mb-4">
-                Disimpan di ruangan sejuk berkelembapan terjaga agar gula alami tidak mengkristal, daging buah tetap empuk, dan bebas hama gudang.
+                {card0.desc}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#E2E8E5] text-label-code text-[#18221E]">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
-                <span className="text-[11px] sm:text-xs truncate">Empuk &amp; legit</span>
+                <span className="text-[11px] sm:text-xs truncate">{card0.footerLeft}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
-                <span className="text-[11px] sm:text-xs truncate">Higienis teruji</span>
+                <span className="text-[11px] sm:text-xs truncate">{card0.footerRight}</span>
               </div>
             </div>
           </div>
@@ -62,19 +72,19 @@ export const BentoAdvantages: React.FC = () => {
                   <Luggage className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span className="text-label-code border border-[#E2E8E5] text-[#52605A] px-2 py-0.5 bg-[#F1F5F3] text-[10px] sm:text-xs">
-                  0 KG KOPER
+                  {card1.tag}
                 </span>
               </div>
               <h3 className="font-headline text-base sm:text-lg text-[#18221E] font-bold mb-1.5">
-                Fokus Ibadah, Tanpa Repot Bagasi
+                {card1.title}
               </h3>
               <p className="text-xs sm:text-sm text-[#52605A] leading-relaxed mb-4">
-                Hindari denda kelebihan bagasi bandara dan risiko pecah di koper. Pesanan diantar langsung ke rumah sebelum Anda mendarat.
+                {card1.desc}
               </p>
             </div>
             <div className="pt-3 border-t border-[#E2E8E5] flex items-center justify-between text-label-code text-[#18221E]">
-              <span className="text-[11px] sm:text-xs">Tiba Tepat Waktu</span>
-              <span className="text-[#3A6B5C] font-semibold text-[11px] sm:text-xs">Jadwal Fleksibel</span>
+              <span className="text-[11px] sm:text-xs">{card1.footerLeft}</span>
+              <span className="text-[#3A6B5C] font-semibold text-[11px] sm:text-xs">{card1.footerRight}</span>
             </div>
           </div>
 
@@ -86,28 +96,29 @@ export const BentoAdvantages: React.FC = () => {
                   <Sliders className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span className="text-label-code border border-[#E2E8E5] text-[#52605A] px-2 py-0.5 bg-[#F1F5F3] text-[10px] sm:text-xs">
-                  FLEKSIBEL BUDGET
+                  {card2.tag}
                 </span>
               </div>
               <h3 className="font-headline text-base sm:text-lg text-[#18221E] font-bold mb-1.5">
-                Custom Paket Sesuai Anggaran
+                {card2.title}
               </h3>
               <p className="text-xs sm:text-sm text-[#52605A] leading-relaxed mb-4">
-                Bebas padu-padan isian dus: kurma Sukkari/Ajwa, kismis, kacang pistachio, cokelat kerikil, tasbih, hingga botol Zamzam.
+                {card2.desc}
               </p>
             </div>
             <div className="pt-3 border-t border-[#E2E8E5] flex items-center justify-between text-label-code">
-              <span className="text-[#52605A] text-[11px] sm:text-xs">Mulai Rp 25.000/dus</span>
+              <span className="text-[#52605A] text-[11px] sm:text-xs">{card2.footerLeft}</span>
               <a
                 href={generateWhatsAppUrl({
-                  customMessage: 'Halo Admin, saya ingin custom isian dus oleh-oleh sesuai budget.',
+                  phone: general.whatsappNumber,
+                  customMessage: card2.waMessage || 'Halo Admin, saya ingin custom isian dus oleh-oleh sesuai budget.',
                 })}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#3A6B5C] font-semibold hover:underline flex items-center gap-1.5 text-[11px] sm:text-xs"
               >
                 <WhatsAppIcon className="w-3.5 h-3.5 text-[#3A6B5C]" />
-                <span>Konsultasi WA</span>
+                <span>{card2.footerRight}</span>
                 <ArrowRight className="w-3 h-3" />
               </a>
             </div>
@@ -121,24 +132,24 @@ export const BentoAdvantages: React.FC = () => {
                   <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span className="text-label-code border border-[#3A6B5C]/40 text-[#3A6B5C] bg-[#F1F5F3] px-2 py-0.5 text-[10px] sm:text-xs">
-                  GARANSI GANTI BARU
+                  {card3.tag}
                 </span>
               </div>
               <h3 className="font-headline text-base sm:text-lg text-[#18221E] font-bold mb-1.5">
-                Pengiriman Berlapis &amp; Bergaransi 100%
+                {card3.title}
               </h3>
               <p className="text-xs sm:text-sm text-[#52605A] leading-relaxed mb-4">
-                Dikemas dengan kardus double-wall dan segel plastik kedap. Apabila terdapat botol rembes atau penyok dalam ekspedisi, kami ganti baru gratis.
+                {card3.desc}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#E2E8E5] text-label-code text-[#18221E]">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
-                <span className="text-[11px] sm:text-xs truncate">Kardus Double Wall</span>
+                <span className="text-[11px] sm:text-xs truncate">{card3.footerLeft}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#3A6B5C] shrink-0" />
-                <span className="text-[11px] sm:text-xs truncate">Asuransi Ekspedisi</span>
+                <span className="text-[11px] sm:text-xs truncate">{card3.footerRight}</span>
               </div>
             </div>
           </div>

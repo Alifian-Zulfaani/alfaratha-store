@@ -3,6 +3,7 @@ import { X, Printer, CheckCircle2 } from 'lucide-react';
 import { TransactionRecord } from '../../types';
 import { formatIDR } from '../../utils/whatsapp';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
+import { useStore } from '../../context/StoreContext';
 
 interface ReceiptModalProps {
   transaction: TransactionRecord | null;
@@ -17,6 +18,9 @@ const PAYMENT_LABEL: Record<TransactionRecord['paymentMethod'], string> = {
 };
 
 export const ReceiptModal: React.FC<ReceiptModalProps> = ({ transaction, onClose }) => {
+  const { siteContent } = useStore();
+  const { general } = siteContent;
+
   useEffect(() => {
     if (!transaction) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -48,7 +52,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ transaction, onClose
       .join('\n');
 
     const msg =
-      `*STRUK DIGITAL ALFARATHA STORE*\n` +
+      `*STRUK DIGITAL ${general.storeName.toUpperCase()}*\n` +
       `No. Faktur: ${transaction.invoiceNumber}\n` +
       `Tanggal: ${formattedDate}\n` +
       `Pelanggan: ${transaction.customerName}\n` +
@@ -105,16 +109,16 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ transaction, onClose
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 font-sans text-xs text-[#18221E]">
           <div className="text-center pb-4 border-b border-dashed border-[#C3C8C4]">
             <div className="w-9 h-9 bg-[#18221E] text-white font-headline font-bold text-base flex items-center justify-center mx-auto mb-2">
-              A
+              {general.storeName.trim().charAt(0).toUpperCase() || 'A'}
             </div>
-            <h3 className="font-headline text-base font-bold tracking-tight">
-              ALFARATHA STORE
+            <h3 className="font-headline text-base font-bold tracking-tight uppercase">
+              {general.storeName}
             </h3>
             <p className="text-[11px] text-[#52605A]">
               Pusat Kurma Premium &amp; Oleh-Oleh Haji Umroh
             </p>
             <p className="text-[10px] text-[#52605A] mt-0.5">
-              Alfaratha Store • WA: +62 815-5443-1137
+              {general.storeName} • WA: {general.whatsappDisplay}
             </p>
           </div>
 

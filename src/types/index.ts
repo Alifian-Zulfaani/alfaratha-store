@@ -191,3 +191,162 @@ export interface NewProductInput {
   storageLocation: StorageLocation;
   expiredDate: string;
 }
+
+// ==========================================
+// LANDING PAGE CMS TYPES
+// ==========================================
+
+export interface CmsPackageBundle extends PackageBundle {
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface CmsTestimonial extends Testimonial {
+  isPublished: boolean;
+  sortOrder: number;
+}
+
+export interface CmsFaqItem extends FAQItem {
+  isPublished: boolean;
+  sortOrder: number;
+}
+
+export interface SiteGeneralContent {
+  storeName: string;
+  tagline: string;
+  whatsappNumber: string;
+  whatsappDisplay: string;
+  email: string;
+  operatingHours: string;
+  operatingHoursShort: string;
+  googleMapsUrl: string;
+  googleMapsEmbedUrl: string;
+  footerBadge: string;
+  footerStorageNote: string;
+  floatingTooltip: string;
+  copyrightText: string;
+}
+
+export interface SiteHeroContent {
+  badgeText: string;
+  titlePrefix: string;
+  titleHighlight: string;
+  description: string;
+  primaryCtaLabel: string;
+  secondaryCtaLabel: string;
+  secondaryCtaMessage: string;
+  proofItems: [string, string, string];
+  showcaseBadge: string;
+  showcaseStatus: string;
+  showcaseImageUrl: string;
+  showcaseLocation: string;
+  showcaseTitle: string;
+  showcaseRating: string;
+  showcaseReviewCount: string;
+  showcaseDescription: string;
+  showcasePriceLabel: string;
+  showcasePriceValue: string;
+  showcasePriceUnit: string;
+  showcaseCtaLabel: string;
+}
+
+export interface SiteTrustMetricItem {
+  iconName: 'shield' | 'package' | 'snowflake' | 'plane';
+  badge: string;
+  title: string;
+  desc: string;
+}
+
+export interface SiteTrustMetricsContent {
+  items: [SiteTrustMetricItem, SiteTrustMetricItem, SiteTrustMetricItem, SiteTrustMetricItem];
+}
+
+export interface SiteBentoCard {
+  tag: string;
+  title: string;
+  desc: string;
+  footerLeft: string;
+  footerRight: string;
+  waMessage?: string;
+}
+
+export interface SiteBentoContent {
+  eyebrow: string;
+  heading: string;
+  subtitle: string;
+  cards: [SiteBentoCard, SiteBentoCard, SiteBentoCard, SiteBentoCard];
+}
+
+export interface SiteOrderStepItem {
+  step: string;
+  num: string;
+  title: string;
+  desc: string;
+  isHighlight: boolean;
+}
+
+export interface SiteOrderStepsContent {
+  eyebrow: string;
+  heading: string;
+  hoursBadge: string;
+  steps: [SiteOrderStepItem, SiteOrderStepItem, SiteOrderStepItem];
+}
+
+export interface SiteFinalCtaContent {
+  badge: string;
+  heading: string;
+  description: string;
+  primaryBtnLabel: string;
+  primaryWaMessage: string;
+  secondaryBtnLabel: string;
+  guarantees: [string, string, string];
+  mapTitle: string;
+  mapBadge: string;
+  mapCardTitle: string;
+  mapCardDesc: string;
+  mapActionLabel: string;
+}
+
+export interface SiteCatalogHeadersContent {
+  productEyebrow: string;
+  productHeading: string;
+  productSubtitle: string;
+  wholesaleTitle: string;
+  wholesaleSubtitle: string;
+  wholesaleBtnLabel: string;
+  wholesaleWaMessage: string;
+  bundleEyebrow: string;
+  bundleHeading: string;
+  bundleSubtitle: string;
+  bundleScheduleNote: string;
+  bundleScheduleLabel: string;
+  bundleScheduleMessage: string;
+  testimonialEyebrow: string;
+  testimonialHeading: string;
+  testimonialSubtitle: string;
+  faqEyebrow: string;
+  faqHeading: string;
+  faqSubtitle: string;
+  faqCtaPrompt: string;
+  faqCtaLabel: string;
+  faqWaMessage: string;
+}
+
+export type SiteSectionKey =
+  | 'general'
+  | 'hero'
+  | 'trustMetrics'
+  | 'bentoAdvantages'
+  | 'orderSteps'
+  | 'finalCta'
+  | 'catalogHeaders';
+
+export interface SiteContentBundle {
+  general: SiteGeneralContent;
+  hero: SiteHeroContent;
+  trustMetrics: SiteTrustMetricsContent;
+  bentoAdvantages: SiteBentoContent;
+  orderSteps: SiteOrderStepsContent;
+  finalCta: SiteFinalCtaContent;
+  catalogHeaders: SiteCatalogHeadersContent;
+}

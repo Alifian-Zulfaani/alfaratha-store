@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ArrowUp, X } from 'lucide-react';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
+import { useStore } from '../../context/StoreContext';
 
 export const FloatingActions: React.FC = () => {
+  const { siteContent } = useStore();
+  const { general } = siteContent;
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
 
@@ -43,7 +46,7 @@ export const FloatingActions: React.FC = () => {
         {showTooltip && (
           <div className="hidden lg:flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E2E8E5] text-xs font-medium text-[#18221E] shadow-md">
             <span className="w-2 h-2 rounded-full bg-[#25D366]" />
-            <span>Butuh bantuan? Chat kami</span>
+            <span>{general.floatingTooltip}</span>
             <button
               type="button"
               onClick={() => setShowTooltip(false)}
@@ -57,7 +60,7 @@ export const FloatingActions: React.FC = () => {
 
         {/* WhatsApp Button (MDI icon, identical circular size, vibrant WhatsApp green) */}
         <a
-          href={generateWhatsAppUrl()}
+          href={generateWhatsAppUrl({ phone: general.whatsappNumber })}
           target="_blank"
           rel="noopener noreferrer"
           className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-[#18221E] flex items-center justify-center transition-all duration-200 shadow-lg hover:scale-105 active:scale-95 border border-white/20 shrink-0"

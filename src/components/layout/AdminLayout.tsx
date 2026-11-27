@@ -12,6 +12,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ChevronDown,
+  LayoutTemplate,
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { ConfirmModal } from '../ui/ConfirmModal';
@@ -84,6 +85,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       to: '/admin/transactions',
       label: 'Riwayat Transaksi',
       icon: ReceiptText,
+    },
+    {
+      to: '/admin/cms',
+      label: 'Konten Etalase',
+      icon: LayoutTemplate,
     },
   ];
 

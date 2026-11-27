@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Check, Star, CalendarCheck, ArrowRight, Gift, ChevronRight } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
-import { PACKAGE_BUNDLES_DATA } from '../../data/packages';
 import { generateWhatsAppUrl, formatIDR } from '../../utils/whatsapp';
+import { useStore } from '../../context/StoreContext';
 
 export const PackageBundles: React.FC = () => {
+  const { packageBundles, siteContent } = useStore();
   const [isBulk, setIsBulk] = useState(true);
+  const { catalogHeaders, general } = siteContent;
+
+  const visibleBundles = useMemo(
+    () => packageBundles.filter((b) => b.isActive).slice(0, 3),
+    [packageBundles]
+  );
 
   return (
     <section className="w-full border-b border-[#E2E8E5] bg-[#F1F5F3] py-8 lg:py-12" id="paket-haji">
@@ -14,13 +21,13 @@ export const PackageBundles: React.FC = () => {
         <div className="text-center max-w-2xl mx-auto mb-5 sm:mb-8">
           <div className="inline-flex items-center gap-1.5 text-[#3A6B5C] text-label-caps uppercase tracking-widest mb-1 font-semibold">
             <span className="w-1.5 h-1.5 bg-[#3A6B5C]" />
-            <span>Solusi Praktis Siap Bagi</span>
+            <span>{catalogHeaders.bundleEyebrow}</span>
           </div>
           <h2 className="font-headline text-xl sm:text-2xl lg:text-3xl text-[#18221E] font-semibold tracking-tight mb-1.5">
-            Paket Oleh-Oleh Haji &amp; Umroh
+            {catalogHeaders.bundleHeading}
           </h2>
           <p className="text-xs sm:text-sm text-[#52605A] mb-4 sm:mb-5 leading-relaxed">
-            Dus eksklusif siap dibagikan ke sanak keluarga &amp; tetangga. Sudah termasuk air Zamzam segel dan gratis custom kartu nama kepulangan jamaah.
+            {catalogHeaders.bundleSubtitle}
           </p>
 
           {/* Segmented Pricing Switch */}
@@ -56,7 +63,7 @@ export const PackageBundles: React.FC = () => {
 
         {/* Mobile Swipe Cue */}
         <div className="flex lg:hidden items-center justify-between text-label-code text-[#52605A] mb-1 px-1">
-          <span>Bandingkan 3 pilihan paket</span>
+          <span>Bandingkan {visibleBundles.length} pilihan paket</span>
           <span className="text-[#264A3F] font-semibold flex items-center gap-1 text-[11px]">
             <span>Geser paket</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -65,11 +72,12 @@ export const PackageBundles: React.FC = () => {
 
         {/* Pricing Tier Cards: Perfectly Proportioned 3-Col Layout on Desktop */}
         <div className="flex lg:grid lg:grid-cols-3 gap-4 lg:gap-5 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none pt-5 pb-5 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {PACKAGE_BUNDLES_DATA.map((pkg) => {
+          {visibleBundles.map((pkg) => {
             const currentPrice = isBulk ? pkg.bulkPrice : pkg.singlePrice;
             const isFeatured = pkg.isPopular;
 
             const waUrl = generateWhatsAppUrl({
+              phone: general.whatsappNumber,
               packageTier: pkg.name,
               price: currentPrice,
               isBulk,
@@ -192,12 +200,13 @@ export const PackageBundles: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <CalendarCheck className="w-5 h-5 text-[#3A6B5C] shrink-0" />
             <span className="text-xs sm:text-sm text-[#18221E]">
-              <strong>Bebas atur tanggal kirim:</strong> Pesanan dapat dijadwalkan tiba H-2 sebelum kepulangan jamaah ke tanah air.
+              <strong>Bebas atur tanggal kirim:</strong> {catalogHeaders.bundleScheduleNote}
             </span>
           </div>
           <a
             href={generateWhatsAppUrl({
-              customMessage: 'Halo Admin Alfaratha, saya ingin jadwalkan kirim paket oleh-oleh Haji/Umroh.',
+              phone: general.whatsappNumber,
+              customMessage: catalogHeaders.bundleScheduleMessage,
             })}
             target="_blank"
             rel="noopener noreferrer"
@@ -205,7 +214,7 @@ export const PackageBundles: React.FC = () => {
             className="text-label-caps uppercase text-[#3A6B5C] hover:underline underline-offset-4 tracking-wider shrink-0 flex items-center gap-1.5 font-semibold text-xs min-h-[32px]"
           >
             <WhatsAppIcon className="w-3.5 h-3.5 text-[#3A6B5C]" />
-            <span>Atur Jadwal Kirim</span>
+            <span>{catalogHeaders.bundleScheduleLabel}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </a>
         </div>

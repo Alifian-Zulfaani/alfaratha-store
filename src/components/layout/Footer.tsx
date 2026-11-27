@@ -3,8 +3,13 @@ import { Link } from 'react-router-dom';
 import { ShieldCheck, MapPin, Lock } from 'lucide-react';
 import { WhatsAppIcon } from '../ui/WhatsAppIcon';
 import { generateWhatsAppUrl } from '../../utils/whatsapp';
+import { useStore } from '../../context/StoreContext';
 
 export const Footer: React.FC = () => {
+  const { siteContent } = useStore();
+  const { general } = siteContent;
+  const brandInitial = general.storeName.trim().charAt(0).toUpperCase() || 'A';
+
   const scrollTo = (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const target = document.querySelector(href);
@@ -21,18 +26,18 @@ export const Footer: React.FC = () => {
           <div className="md:col-span-1 flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-white text-[#18221E] flex items-center justify-center font-headline text-sm font-bold">
-                A
+                {brandInitial}
               </div>
               <span className="font-headline text-lg tracking-tight text-white font-semibold">
-                Alfaratha Store
+                {general.storeName}
               </span>
             </div>
             <p className="text-xs text-[#DAE5DE] leading-relaxed">
-              Kurma pilihan kualitas super dan oleh-oleh khas Tanah Suci yang dikemas rapi dan higienis.
+              {general.tagline}
             </p>
             <div className="inline-flex items-center gap-2 border border-[#3A6B5C] text-[#B9EEDA] px-2.5 py-1 text-label-caps w-fit font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>100% Asli Garansi Madinah &amp; Makkah</span>
+              <span>{general.footerBadge}</span>
             </div>
           </div>
 
@@ -78,13 +83,13 @@ export const Footer: React.FC = () => {
             </p>
             <div className="text-xs text-[#DAE5DE] space-y-1">
               <p className="text-white font-medium">Buka Setiap Hari:</p>
-              <p>Senin – Minggu: 07:30 – 22:00 WIB</p>
+              <p>{general.operatingHours}</p>
             </div>
             <p className="text-xs text-[#DAE5DE] mt-1 leading-relaxed">
-              Penyimpanan sejuk dan higienis agar kurma tetap empuk, segar, dan tidak berkutu.
+              {general.footerStorageNote}
             </p>
             <a
-              href="https://maps.app.goo.gl/mFNWPrfMV3TEtqqV8"
+              href={general.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Petunjuk arah lokasi gudang Alfaratha Kurma di Google Maps"
@@ -105,23 +110,23 @@ export const Footer: React.FC = () => {
             </p>
             <a
               className="inline-flex items-center gap-2 font-headline text-base sm:text-lg text-white hover:text-[#B9EEDA] transition-colors py-1"
-              href={generateWhatsAppUrl()}
+              href={generateWhatsAppUrl({ phone: general.whatsappNumber })}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Hubungi nomor WhatsApp resmi Alfaratha"
             >
               <WhatsAppIcon className="w-5 h-5 text-[#B9EEDA]" />
-              <span>+62 815-5443-1137</span>
+              <span>{general.whatsappDisplay}</span>
             </a>
             <span className="text-label-code text-[#DAE5DE]">
-              admin@alfaratha.store
+              {general.email}
             </span>
           </div>
         </div>
 
         {/* Bottom strip */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#DAE5DE]">
-          <div>© 2025 Alfaratha Store. Seluruh Hak Cipta Dilindungi.</div>
+          <div>{general.copyrightText}</div>
           <div className="flex items-center gap-6 text-label-code">
             <a
               className="hover:text-white transition-colors py-1"
