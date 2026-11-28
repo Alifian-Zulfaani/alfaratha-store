@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Package,
   AlertTriangle,
@@ -23,7 +24,12 @@ import {
 import { formatIDR } from '../../utils/whatsapp';
 import { StockAdjustmentModal } from '../../components/pos/StockAdjustmentModal';
 import { ProductFormModal } from '../../components/pos/ProductFormModal';
-import { StockMutationDrawer } from '../../components/pos/StockMutationDrawer';
+import {
+  StockMutationsView,
+  MutationFilterState,
+  filterStockLogs,
+  exportMutationLogsCsv,
+} from '../../components/pos/StockMutationsView';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { TablePagination } from '../../components/ui/TablePagination';
 
@@ -40,8 +46,18 @@ const CATEGORY_NAME: Record<Exclude<ProductCategory, 'all'>, string> = {
   paket: 'Paket Oleh-Oleh',
 };
 
+const DEFAULT_MUTATION_FILTERS: MutationFilterState = {
+  searchQuery: '',
+  typeFilter: 'all',
+  staffFilter: 'all',
+  periodFilter: 'all',
+};
+
 export const InventoryPage: React.FC = () => {
   const { products, stockLogs, deleteProduct } = useStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeView: 'stock' | 'mutations' =
+    searchParams.get('tab') === 'mutasi' ? 'mutations' : 'stock';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory>('all');
@@ -51,11 +67,50 @@ export const InventoryPage: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
+  const [mutationFilters, setMutationFilters] =
+    useState<MutationFilterState>(DEFAULT_MUTATION_FILTERS);
+  const [mutPageSize, setMutPageSize] = useState<number>(10);
+  const [mutCurrentPage, setMutCurrentPage] = useState<number>(1);
+
   const [adjustTarget, setAdjustTarget] = useState<InventoryRow | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<InventoryRow | null>(null);
-  const [mutationDrawerOpen, setMutationDrawerOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<NormalizedProduct | null>(null);
+
+  const switchView = (view: 'stock' | 'mutations') => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (view === 'mutations') {
+      nextParams.set('tab', 'mutasi');
+    } else {
+      nextParams.delete('tab');
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleOpenSkuMutations = (sku: string) => {
+    setMutationFilters({
+      ...DEFAULT_MUTATION_FILTERS,
+      searchQuery: sku,
+    });
+    setMutCurrentPage(1);
+    switchView('mutations');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleMutationFiltersChange = (next: Partial<MutationFilterState>) => {
+    setMutationFilters((prev) => ({ ...prev, ...next }));
+    setMutCurrentPage(1);
+  };
+
+  const handleResetMutationFilters = () => {
+    setMutationFilters(DEFAULT_MUTATION_FILTERS);
+    setMutCurrentPage(1);
+  };
+
+  const filteredMutationLogs = useMemo(
+    () => filterStockLogs(stockLogs, mutationFilters),
+    [stockLogs, mutationFilters]
+  );
 
   const allRows = useMemo<InventoryRow[]>(() => {
     const rows: InventoryRow[] = [];
@@ -211,16 +266,11 @@ export const InventoryPage: React.FC = () => {
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
           <button
             type="button"
-            onClick={() => setMutationDrawerOpen(true)}
-            className="h-10 px-3 sm:px-3.5 bg-white hover:bg-[#F1F5F3] border border-[#E2E8E5] text-[#18221E] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <History className="w-4 h-4 text-[#3A6B5C] shrink-0" />
-            <span>Riwayat Mutasi</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleExportCsv}
+            onClick={() =>
+              activeView === 'mutations'
+                ? exportMutationLogsCsv(filteredMutationLogs)
+                : handleExportCsv()
+            }
             className="h-10 px-3 sm:px-3.5 bg-white hover:bg-[#F1F5F3] border border-[#E2E8E5] text-[#18221E] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <Download className="w-4 h-4 text-[#52605A] shrink-0" />
@@ -241,6 +291,45 @@ export const InventoryPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Mode Switcher Tab Bar */}
+      <div
+        role="tablist"
+        aria-label="Mode tampilan inventori"
+        className="bg-white border border-[#E2E8E5] p-1.5 flex items-center gap-1.5"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeView === 'stock'}
+          onClick={() => switchView('stock')}
+          className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 text-[11px] sm:text-xs font-semibold whitespace-nowrap border transition-colors cursor-pointer ${
+            activeView === 'stock'
+              ? 'bg-[#18221E] text-white border-[#18221E]'
+              : 'bg-[#F8FAF9] text-[#52605A] border-[#E2E8E5] hover:border-[#18221E] hover:text-[#18221E]'
+          }`}
+        >
+          <Package className="w-3.5 h-3.5 shrink-0" />
+          <span>Daftar Stok ({kpis.totalSkus})</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeView === 'mutations'}
+          onClick={() => switchView('mutations')}
+          className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 text-[11px] sm:text-xs font-semibold whitespace-nowrap border transition-colors cursor-pointer ${
+            activeView === 'mutations'
+              ? 'bg-[#18221E] text-white border-[#18221E]'
+              : 'bg-[#F8FAF9] text-[#52605A] border-[#E2E8E5] hover:border-[#18221E] hover:text-[#18221E]'
+          }`}
+        >
+          <History className="w-3.5 h-3.5 shrink-0" />
+          <span>Riwayat Mutasi ({stockLogs.length})</span>
+        </button>
+      </div>
+
+      {activeView === 'stock' ? (
+        <>
       {/* 4 KPI Summary Tiles */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="bg-white border border-[#E2E8E5] p-4 shadow-[0_4px_20px_-2px_rgba(24,34,30,0.04)] flex flex-col justify-between">
@@ -429,7 +518,7 @@ export const InventoryPage: React.FC = () => {
                 <th className="py-3 px-3 text-right min-w-[110px]">Harga Modal</th>
                 <th className="py-3 px-3 text-right min-w-[110px]">Harga Jual</th>
                 <th className="py-3 px-4 min-w-[175px]">Ketersediaan Stok</th>
-                <th className="py-3 px-4 text-center min-w-[140px]">Aksi</th>
+                <th className="py-3 px-4 text-center min-w-[170px]">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8E5] text-xs text-[#18221E]">
@@ -553,6 +642,16 @@ export const InventoryPage: React.FC = () => {
 
                           <button
                             type="button"
+                            onClick={() => handleOpenSkuMutations(variant.sku)}
+                            title={`Lihat riwayat mutasi ${variant.sku}`}
+                            aria-label={`Lihat riwayat mutasi ${product.name} ${variant.label}`}
+                            className="w-8 h-8 flex items-center justify-center bg-[#F1F5F3] hover:bg-[#3A6B5C] hover:text-white border border-[#E2E8E5] text-[#3A6B5C] transition-colors cursor-pointer"
+                          >
+                            <History className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => {
                               setEditTarget({ product, variant });
                               setFormOpen(true);
@@ -597,8 +696,25 @@ export const InventoryPage: React.FC = () => {
           onPageSizeChange={setPageSize}
         />
       </section>
+        </>
+      ) : (
+        <StockMutationsView
+          allLogs={stockLogs}
+          filteredLogs={filteredMutationLogs}
+          filters={mutationFilters}
+          pageSize={mutPageSize}
+          currentPage={mutCurrentPage}
+          onFiltersChange={handleMutationFiltersChange}
+          onResetFilters={handleResetMutationFilters}
+          onPageChange={setMutCurrentPage}
+          onPageSizeChange={(size) => {
+            setMutPageSize(size);
+            setMutCurrentPage(1);
+          }}
+        />
+      )}
 
-      {/* Modals & Drawers */}
+      {/* Modals */}
       <StockAdjustmentModal
         target={adjustTarget}
         onClose={() => setAdjustTarget(null)}
@@ -611,12 +727,6 @@ export const InventoryPage: React.FC = () => {
           setFormOpen(false);
           setEditTarget(null);
         }}
-      />
-
-      <StockMutationDrawer
-        isOpen={mutationDrawerOpen}
-        logs={stockLogs}
-        onClose={() => setMutationDrawerOpen(false)}
       />
 
       <ConfirmModal
