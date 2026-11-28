@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ReceiptText, Search, Download, Eye, Banknote, TrendingUp, Calendar, X } from 'lucide-react';
+import { ReceiptText, Search, FileSpreadsheet, Eye, Banknote, TrendingUp, Calendar, X } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { PaymentMethod, TransactionRecord } from '../../types';
 import { formatIDR } from '../../utils/whatsapp';
+import { exportTransactionsToExcel } from '../../utils/excelExport';
 import { ReceiptModal } from '../../components/pos/ReceiptModal';
 import { TablePagination } from '../../components/ui/TablePagination';
 
@@ -14,12 +15,13 @@ const PAYMENT_LABEL: Record<PaymentMethod, string> = {
 };
 
 export const TransactionsPage: React.FC = () => {
-  const { transactions } = useStore();
+  const { transactions, siteContent } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<'all' | PaymentMethod>('all');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedReceipt, setSelectedReceipt] = useState<TransactionRecord | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const stats = useMemo(() => {
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -88,48 +90,19 @@ export const TransactionsPage: React.FC = () => {
       ? filteredTransactions.length
       : Math.min(filteredTransactions.length, safeCurrentPage * pageSize);
 
-  const handleExportCsv = () => {
-    const headers = [
-      'No Invoice',
-      'Waktu',
-      'Kasir',
-      'Pelanggan',
-      'Mode Harga',
-      'Item',
-      'Subtotal',
-      'Diskon',
-      'Total Bayar',
-      'Metode Bayar',
-    ];
-
-    const rows = [
-      headers.join(','),
-      ...filteredTransactions.map((trx) => {
-        const itemSummary = trx.items
-          .map((i) => `${i.productName} (${i.variantLabel}) x${i.quantity}`)
-          .join(' | ');
-        return [
-          `"${trx.invoiceNumber}"`,
-          `"${new Date(trx.timestamp).toLocaleString('id-ID')}"`,
-          `"${trx.cashierName}"`,
-          `"${trx.customerName.replace(/"/g, '""')}"`,
-          `"${trx.pricingMode}"`,
-          `"${itemSummary.replace(/"/g, '""')}"`,
-          trx.subtotal,
-          trx.discount,
-          trx.total,
-          `"${PAYMENT_LABEL[trx.paymentMethod]}"`,
-        ].join(',');
-      }),
-    ];
-
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `alfaratha-transaksi-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleExportExcel = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      await exportTransactionsToExcel(
+        filteredTransactions,
+        siteContent.general.storeName
+      );
+    } catch (err) {
+      console.error('Gagal mengekspor Excel transaksi:', err);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -145,17 +118,18 @@ export const TransactionsPage: React.FC = () => {
             Riwayat Transaksi Kasir
           </h1>
           <p className="text-xs sm:text-sm text-[#52605A] mt-0.5">
-            Daftar seluruh faktur penjualan POS beserta opsi lihat ulang struk dan ekspor CSV.
+            Daftar seluruh faktur penjualan POS beserta opsi lihat ulang struk dan ekspor Excel (.xlsx).
           </p>
         </div>
 
         <button
           type="button"
-          onClick={handleExportCsv}
-          className="h-10 px-4 bg-[#18221E] hover:bg-[#3A6B5C] text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shrink-0"
+          disabled={isExporting}
+          onClick={() => void handleExportExcel()}
+          className="h-10 px-4 bg-[#18221E] hover:bg-[#3A6B5C] disabled:bg-[#7E8E87] disabled:cursor-not-allowed text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shrink-0"
         >
-          <Download className="w-4 h-4" />
-          <span>Export CSV Penjualan</span>
+          <FileSpreadsheet className="w-4 h-4 shrink-0" />
+          <span>{isExporting ? 'Menyiapkan Excel...' : 'Export Excel Penjualan'}</span>
         </button>
       </div>
 

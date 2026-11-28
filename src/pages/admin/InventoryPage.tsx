@@ -8,7 +8,7 @@ import {
   Search,
   Plus,
   History,
-  Download,
+  FileSpreadsheet,
   RefreshCw,
   Pencil,
   Trash2,
@@ -22,13 +22,16 @@ import {
   StorageLocation,
 } from '../../types';
 import { formatIDR } from '../../utils/whatsapp';
+import {
+  exportInventoryToExcel,
+  exportMutationsToExcel,
+} from '../../utils/excelExport';
 import { StockAdjustmentModal } from '../../components/pos/StockAdjustmentModal';
 import { ProductFormModal } from '../../components/pos/ProductFormModal';
 import {
   StockMutationsView,
   MutationFilterState,
   filterStockLogs,
-  exportMutationLogsCsv,
 } from '../../components/pos/StockMutationsView';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { TablePagination } from '../../components/ui/TablePagination';
@@ -54,10 +57,11 @@ const DEFAULT_MUTATION_FILTERS: MutationFilterState = {
 };
 
 export const InventoryPage: React.FC = () => {
-  const { products, stockLogs, deleteProduct } = useStore();
+  const { products, stockLogs, siteContent, deleteProduct } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeView: 'stock' | 'mutations' =
     searchParams.get('tab') === 'mutasi' ? 'mutations' : 'stock';
+  const [isExporting, setIsExporting] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory>('all');
@@ -206,44 +210,21 @@ export const InventoryPage: React.FC = () => {
       ? filteredRows.length
       : Math.min(filteredRows.length, safeCurrentPage * pageSize);
 
-  const handleExportCsv = () => {
-    const header = [
-      'SKU',
-      'Nama Produk',
-      'Varian',
-      'Kategori',
-      'Lokasi Simpan',
-      'Stok',
-      'Min Stok',
-      'Harga Modal',
-      'Harga Jual',
-      'Expired Date',
-    ];
-    const csvRows = [
-      header.join(','),
-      ...filteredRows.map(({ product, variant }) =>
-        [
-          `"${variant.sku}"`,
-          `"${product.name.replace(/"/g, '""')}"`,
-          `"${variant.label.replace(/"/g, '""')}"`,
-          `"${CATEGORY_NAME[product.category]}"`,
-          `"${variant.storageLocation}"`,
-          variant.stock,
-          variant.minStock,
-          variant.costPrice,
-          variant.price,
-          variant.expiredDate,
-        ].join(',')
-      ),
-    ];
-
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `alfaratha-inventory-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleExportExcel = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const storeName = siteContent.general.storeName;
+      if (activeView === 'mutations') {
+        await exportMutationsToExcel(filteredMutationLogs, storeName);
+      } else {
+        await exportInventoryToExcel(filteredRows, storeName);
+      }
+    } catch (err) {
+      console.error('Gagal mengekspor Excel inventori:', err);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -263,18 +244,15 @@ export const InventoryPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 w-full lg:w-auto">
           <button
             type="button"
-            onClick={() =>
-              activeView === 'mutations'
-                ? exportMutationLogsCsv(filteredMutationLogs)
-                : handleExportCsv()
-            }
-            className="h-10 px-3 sm:px-3.5 bg-white hover:bg-[#F1F5F3] border border-[#E2E8E5] text-[#18221E] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            disabled={isExporting}
+            onClick={() => void handleExportExcel()}
+            className="h-10 px-3 sm:px-4 bg-white hover:bg-[#F1F5F3] disabled:opacity-60 disabled:cursor-not-allowed border border-[#E2E8E5] text-[#18221E] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Download className="w-4 h-4 text-[#52605A] shrink-0" />
-            <span>Export CSV</span>
+            <FileSpreadsheet className="w-4 h-4 text-[#3A6B5C] shrink-0" />
+            <span>{isExporting ? 'Menyiapkan Excel...' : 'Export Excel'}</span>
           </button>
 
           <button
@@ -283,7 +261,7 @@ export const InventoryPage: React.FC = () => {
               setEditTarget(null);
               setFormOpen(true);
             }}
-            className="col-span-2 sm:col-span-1 h-10 px-4 bg-[#3A6B5C] hover:bg-[#2E5649] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="h-10 px-4 bg-[#3A6B5C] hover:bg-[#2E5649] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span>Tambah Produk Baru</span>

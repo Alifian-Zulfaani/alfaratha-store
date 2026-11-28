@@ -73,56 +73,6 @@ export function filterStockLogs(logs: StockLog[], filters: MutationFilterState):
   });
 }
 
-function escapeCsvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
-}
-
-export function exportMutationLogsCsv(logs: StockLog[]): void {
-  const header = [
-    'Waktu',
-    'SKU',
-    'Nama Produk',
-    'Varian',
-    'Jenis Mutasi',
-    'Perubahan',
-    'Stok Sebelum',
-    'Stok Sesudah',
-    'Keterangan / Referensi',
-    'Petugas',
-  ];
-
-  const csvRows = [
-    header.join(','),
-    ...logs.map((log) =>
-      [
-        escapeCsvCell(
-          new Date(log.timestamp).toLocaleString('id-ID', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-          })
-        ),
-        escapeCsvCell(log.sku),
-        escapeCsvCell(log.productName),
-        escapeCsvCell(log.variantLabel),
-        escapeCsvCell(MUTATION_TYPE_LABELS[log.type]),
-        log.delta > 0 ? `+${log.delta}` : String(log.delta),
-        log.stockBefore,
-        log.stockAfter,
-        escapeCsvCell(log.reason),
-        escapeCsvCell(log.staffName),
-      ].join(',')
-    ),
-  ];
-
-  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `alfaratha-mutasi-stok-${new Date().toISOString().slice(0, 10)}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 interface StockMutationsViewProps {
   allLogs: StockLog[];
   filteredLogs: StockLog[];
